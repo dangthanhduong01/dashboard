@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hoa Anh Đào Rơi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            position: relative;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .title h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: fadeIn 2s ease-in;
+        }
+
+        .title p {
+            font-size: 1.5rem;
+            animation: fadeIn 3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .petal {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(ellipse at center, #ffb7d5 0%, #ffa0c9 50%, #ff85b8 100%);
+            border-radius: 50% 0 50% 0;
+            opacity: 0.8;
+            animation: fall linear infinite;
+            filter: drop-shadow(0 0 3px rgba(255, 192, 203, 0.6));
+        }
+
+        .petal::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.5) 0%, transparent 70%);
+            border-radius: 50% 0 50% 0;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-100px) rotate(0deg) translateX(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg) translateX(100px);
+                opacity: 0.3;
+            }
+        }
+
+        @keyframes sway {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            50% {
+                transform: translateX(50px);
+            }
+        }
+
+        /* Tree branch decoration */
+        .branch {
+            position: absolute;
+            width: 3px;
+            height: 200px;
+            background: linear-gradient(to bottom, #4a3728, #3d2a1f);
+            transform-origin: top center;
+            border-radius: 2px;
+        }
+
+        .branch1 {
+            top: -50px;
+            left: 10%;
+            transform: rotate(15deg);
+        }
+
+        .branch2 {
+            top: -30px;
+            right: 15%;
+            transform: rotate(-20deg);
+        }
+
+        .branch3 {
+            top: 100px;
+            left: 5%;
+            transform: rotate(10deg);
+        }
+
+        .branch4 {
+            top: 80px;
+            right: 8%;
+            transform: rotate(-15deg);
+        }
+
+        /* Flower clusters on branches */
+        .flower-cluster {
+            position: absolute;
+            display: flex;
+            gap: 5px;
+        }
+
+        .flower {
+            width: 25px;
+            height: 25px;
+            position: relative;
+        }
+
+        .flower .petal-static {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ffb7d5;
+            border-radius: 50%;
+            opacity: 0.9;
+        }
+
+        .flower .petal-static:nth-child(1) { top: 0; left: 50%; transform: translateX(-50%); }
+        .flower .petal-static:nth-child(2) { top: 50%; right: 0; transform: translateY(-50%); }
+        .flower .petal-static:nth-child(3) { bottom: 0; left: 50%; transform: translateX(-50%); }
+        .flower .petal-static:nth-child(4) { top: 50%; left: 0; transform: translateY(-50%); }
+        .flower .petal-static:nth-child(5) { 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            background: #ffeb3b;
+            width: 6px;
+            height: 6px;
+        }
+
+        .stats {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: white;
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container">
+        <!-- Branches -->
+        <div class="branch branch1">
+            <div class="flower-cluster" style="top: 50px; left: -20px;">
+                <div class="flower">
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                </div>
+                <div class="flower">
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                </div>
+            </div>
+        </div>
+        <div class="branch branch2">
+            <div class="flower-cluster" style="top: 60px; right: -20px;">
+                <div class="flower">
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                </div>
+                <div class="flower">
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                </div>
+            </div>
+        </div>
+        <div class="branch branch3">
+            <div class="flower-cluster" style="top: 80px; left: -15px;">
+                <div class="flower">
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                </div>
+            </div>
+        </div>
+        <div class="branch branch4">
+            <div class="flower-cluster" style="top: 70px; right: -15px;">
+                <div class="flower">
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                    <div class="petal-static"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Title -->
+        <div class="title">
+            <h1>🌸 Hoa Anh Đào 🌸</h1>
+            <p>Vẻ đẹp của mùa xuân</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats">
+            <div>Cánh hoa: <span id="petalCount">0</span></div>
+            <div>Click để thêm cánh hoa! 🌸</div>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('container');
+        const petalCountElement = document.getElementById('petalCount');
+        let petalCount = 0;
+
+        // Function to create a petal
+        function createPetal(x, y) {
+            const petal = document.createElement('div');
+            petal.className = 'petal';
+            
+            // Random starting position
+            const startX = x !== undefined ? x : Math.random() * window.innerWidth;
+            petal.style.left = startX + 'px';
+            petal.style.top = (y !== undefined ? y : -20) + 'px';
+            
+            // Random size variation
+            const size = 15 + Math.random() * 15;
+            petal.style.width = size + 'px';
+            petal.style.height = size + 'px';
+            
+            // Random animation duration
+            const duration = 8 + Math.random() * 8;
+            petal.style.animationDuration = duration + 's';
+            
+            // Random delay
+            const delay = Math.random() * 2;
+            petal.style.animationDelay = delay + 's';
+            
+            // Random horizontal movement
+            const xMovement = -50 + Math.random() * 100;
+            petal.style.setProperty('--x-movement', xMovement + 'px');
+            
+            container.appendChild(petal);
+            petalCount++;
+            petalCountElement.textContent = petalCount;
+            
+            // Remove petal after animation
+            setTimeout(() => {
+                petal.remove();
+                petalCount--;
+                petalCountElement.textContent = petalCount;
+            }, (duration + delay) * 1000);
+        }
+
+        // Create petals periodically
+        function startPetalRain() {
+            setInterval(() => {
+                createPetal();
+            }, 300);
+        }
+
+        // Create burst of petals on click
+        container.addEventListener('click', (e) => {
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    createPetal(
+                        e.clientX + (Math.random() - 0.5) * 100,
+                        e.clientY
+                    );
+                }, i * 50);
+            }
+        });
+
+        // Start the petal rain
+        startPetalRain();
+
+        // Create initial petals
+        for (let i = 0; i < 20; i++) {
+            setTimeout(() => createPetal(), i * 200);
+        }
+    </script>
+</body>
+</html>
