@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tuyết Rơi Mùa Đông</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(180deg, #1e3a5f 0%, #2d5a7f 50%, #d4e8f7 100%);
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            position: relative;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Snow ground */
+        .ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, #ffffff 100%);
+            border-radius: 50% 50% 0 0;
+            box-shadow: 0 -10px 30px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Snow hills */
+        .hill {
+            position: absolute;
+            bottom: 0;
+            background: radial-gradient(ellipse at top, #f0f8ff 0%, #ffffff 100%);
+            border-radius: 50%;
+            opacity: 0.9;
+        }
+
+        .hill1 {
+            left: -10%;
+            width: 40%;
+            height: 150px;
+        }
+
+        .hill2 {
+            right: -5%;
+            width: 35%;
+            height: 120px;
+        }
+
+        /* Girl character */
+        .girl-container {
+            position: absolute;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .girl-container:hover {
+            transform: translateX(-50%) scale(1.05);
+        }
+
+        /* Girl body */
+        .girl {
+            position: relative;
+            width: 200px;
+            height: 300px;
+        }
+
+        /* Head */
+        .head {
+            position: absolute;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 90px;
+            background: #ffd5b5;
+            border-radius: 50% 50% 45% 45%;
+            z-index: 2;
+        }
+
+        /* Hair */
+        .hair {
+            position: absolute;
+            top: -10px;
+            left: -5px;
+            width: 90px;
+            height: 70px;
+            background: #3d2817;
+            border-radius: 50% 50% 20% 20%;
+            z-index: 1;
+        }
+
+        .hair::before {
+            content: '';
+            position: absolute;
+            top: 50px;
+            left: -10px;
+            width: 30px;
+            height: 40px;
+            background: #3d2817;
+            border-radius: 0 0 0 50%;
+        }
+
+        .hair::after {
+            content: '';
+            position: absolute;
+            top: 50px;
+            right: -10px;
+            width: 30px;
+            height: 40px;
+            background: #3d2817;
+            border-radius: 0 0 50% 0;
+        }
+
+        /* Eyes */
+        .eye {
+            position: absolute;
+            top: 35px;
+            width: 8px;
+            height: 12px;
+            background: #2c1810;
+            border-radius: 50%;
+        }
+
+        .eye-left {
+            left: 20px;
+        }
+
+        .eye-right {
+            right: 20px;
+        }
+
+        /* Eye blink animation */
+        .blink .eye {
+            animation: blink 0.3s ease-in-out 1;
+        }
+
+        @keyframes blink {
+            0%, 100% {
+                height: 12px;
+            }
+            50% {
+                height: 2px;
+            }
+        }
+
+        /* Blush */
+        .blush {
+            position: absolute;
+            top: 45px;
+            width: 15px;
+            height: 10px;
+            background: rgba(255, 182, 193, 0.6);
+            border-radius: 50%;
+        }
+
+        .blush-left {
+            left: 10px;
+        }
+
+        .blush-right {
+            right: 10px;
+        }
+
+        /* Smile */
+        .smile {
+            position: absolute;
+            top: 55px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25px;
+            height: 12px;
+            border: 2px solid #2c1810;
+            border-top: none;
+            border-radius: 0 0 25px 25px;
+        }
+
+        /* Body */
+        .body {
+            position: absolute;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 110px;
+            background: #ff6b9d;
+            border-radius: 20px 20px 50% 50%;
+        }
+
+        /* Coat buttons */
+        .button {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            border: 2px solid #d4145a;
+        }
+
+        .button1 { top: 20px; }
+        .button2 { top: 40px; }
+        .button3 { top: 60px; }
+
+        /* Arms */
+        .arm {
+            position: absolute;
+            width: 35px;
+            height: 80px;
+            background: #ff6b9d;
+            border-radius: 20px;
+        }
+
+        .arm-left {
+            top: 130px;
+            left: 30px;
+            transform: rotate(-45deg);
+        }
+
+        .arm-right {
+            top: 130px;
+            right: 30px;
+            transform: rotate(45deg);
+        }
+
+        /* Hands */
+        .hand {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25px;
+            height: 25px;
+            background: #ffd5b5;
+            border-radius: 50%;
+        }
+
+        /* Snowball */
+        .snowball {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle at 30% 30%, #ffffff 0%, #e8f4f8 100%);
+            border-radius: 50%;
+            box-shadow: 
+                inset -5px -5px 10px rgba(0, 0, 0, 0.1),
+                5px 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 5;
+        }
+
+        /* Legs */
+        .leg {
+            position: absolute;
+            bottom: 30px;
+            width: 30px;
+            height: 60px;
+            background: #4a5568;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .leg-left {
+            left: 65px;
+        }
+
+        .leg-right {
+            right: 65px;
+        }
+
+        /* Shoes */
+        .shoe {
+            position: absolute;
+            bottom: 0;
+            width: 35px;
+            height: 20px;
+            background: #2d3748;
+            border-radius: 50% 50% 0 0;
+        }
+
+        /* Snowflake */
+        .snowflake {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: fall linear infinite;
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-100px) translateX(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) translateX(var(--x-movement)) rotate(360deg);
+                opacity: 0.3;
+            }
+        }
+
+        /* Title */
+        .title {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 10;
+            color: white;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .title h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            animation: fadeIn 2s ease-in;
+        }
+
+        .title p {
+            font-size: 1.2rem;
+            animation: fadeIn 3s ease-in;
+            color: #e8f4f8;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Stats */
+        .stats {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: white;
+            background: rgba(30, 58, 95, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Snow particles on ground */
+        .ground-snow {
+            position: absolute;
+            width: 100%;
+            height: 50px;
+            bottom: 0;
+            overflow: hidden;
+        }
+
+        .snow-pile {
+            position: absolute;
+            bottom: 0;
+            width: 80px;
+            height: 30px;
+            background: radial-gradient(ellipse at top, #ffffff 0%, #f0f8ff 100%);
+            border-radius: 50%;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container">
+        <!-- Title -->
+        <div class="title">
+            <h1>❄️ Mùa Đông Tuyết Trắng ❄️</h1>
+            <p>Click vào cô gái để xem nháy mắt!</p>
+        </div>
+
+        <!-- Snow hills -->
+        <div class="hill hill1"></div>
+        <div class="hill hill2"></div>
+
+        <!-- Girl character -->
+        <div class="girl-container" id="girlContainer">
+            <div class="girl">
+                <!-- Head -->
+                <div class="head">
+                    <div class="hair"></div>
+                    <div class="eye eye-left"></div>
+                    <div class="eye eye-right"></div>
+                    <div class="blush blush-left"></div>
+                    <div class="blush blush-right"></div>
+                    <div class="smile"></div>
+                </div>
+                
+                <!-- Body -->
+                <div class="body">
+                    <div class="button button1"></div>
+                    <div class="button button2"></div>
+                    <div class="button button3"></div>
+                </div>
+                
+                <!-- Arms -->
+                <div class="arm arm-left">
+                    <div class="hand"></div>
+                </div>
+                <div class="arm arm-right">
+                    <div class="hand"></div>
+                </div>
+                
+                <!-- Snowball -->
+                <div class="snowball"></div>
+                
+                <!-- Legs -->
+                <div class="leg leg-left">
+                    <div class="shoe"></div>
+                </div>
+                <div class="leg leg-right">
+                    <div class="shoe"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ground -->
+        <div class="ground">
+            <div class="ground-snow">
+                <div class="snow-pile" style="left: 10%;"></div>
+                <div class="snow-pile" style="left: 25%;"></div>
+                <div class="snow-pile" style="left: 40%;"></div>
+                <div class="snow-pile" style="left: 55%;"></div>
+                <div class="snow-pile" style="left: 70%;"></div>
+                <div class="snow-pile" style="left: 85%;"></div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats">
+            <div>Bông tuyết: <span id="snowCount">0</span></div>
+            <div>Số lần nháy mắt: <span id="blinkCount">0</span></div>
+            <div>❄️ Nhiệt độ: -5°C</div>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('container');
+        const girlContainer = document.getElementById('girlContainer');
+        const head = document.querySelector('.head');
+        const snowCountElement = document.getElementById('snowCount');
+        const blinkCountElement = document.getElementById('blinkCount');
+        let snowCount = 0;
+        let blinkCount = 0;
+
+        // Function to create a snowflake
+        function createSnowflake(x, y) {
+            const snowflake = document.createElement('div');
+            snowflake.className = 'snowflake';
+            
+            const startX = x !== undefined ? x : Math.random() * window.innerWidth;
+            snowflake.style.left = startX + 'px';
+            snowflake.style.top = (y !== undefined ? y : -20) + 'px';
+            
+            // Random size
+            const size = 5 + Math.random() * 10;
+            snowflake.style.width = size + 'px';
+            snowflake.style.height = size + 'px';
+            
+            // Random duration
+            const duration = 5 + Math.random() * 10;
+            snowflake.style.animationDuration = duration + 's';
+            
+            // Random delay
+            const delay = Math.random() * 2;
+            snowflake.style.animationDelay = delay + 's';
+            
+            // Random horizontal movement
+            const xMovement = -50 + Math.random() * 100;
+            snowflake.style.setProperty('--x-movement', xMovement + 'px');
+            
+            container.appendChild(snowflake);
+            snowCount++;
+            snowCountElement.textContent = snowCount;
+            
+            // Remove snowflake after animation
+            setTimeout(() => {
+                snowflake.remove();
+                snowCount--;
+                snowCountElement.textContent = snowCount;
+            }, (duration + delay) * 1000);
+        }
+
+        // Start snowfall
+        function startSnowfall() {
+            setInterval(() => {
+                createSnowflake();
+            }, 200);
+        }
+
+        // Blink effect
+        function makeGirlBlink() {
+            head.classList.add('blink');
+            blinkCount++;
+            blinkCountElement.textContent = blinkCount;
+            
+            setTimeout(() => {
+                head.classList.remove('blink');
+            }, 300);
+        }
+
+        // Girl click event
+        girlContainer.addEventListener('click', (e) => {
+            e.stopPropagation();
+            makeGirlBlink();
+            
+            // Create snowflake burst around girl
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => {
+                    const angle = (Math.PI * 2 * i) / 8;
+                    const radius = 100;
+                    const x = girlContainer.offsetLeft + 100 + Math.cos(angle) * radius;
+                    const y = girlContainer.offsetTop + 150 + Math.sin(angle) * radius;
+                    createSnowflake(x, y);
+                }, i * 50);
+            }
+        });
+
+        // Random blink
+        function randomBlink() {
+            if (Math.random() > 0.8) {
+                makeGirlBlink();
+            }
+        }
+
+        setInterval(randomBlink, 3000);
+
+        // Click anywhere to create snowflakes
+        container.addEventListener('click', (e) => {
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    createSnowflake(
+                        e.clientX + (Math.random() - 0.5) * 80,
+                        e.clientY
+                    );
+                }, i * 50);
+            }
+        });
+
+        // Start the snowfall
+        startSnowfall();
+
+        // Create initial snowflakes
+        for (let i = 0; i < 30; i++) {
+            setTimeout(() => createSnowflake(), i * 150);
+        }
+    </script>
+</body>
+</html>
