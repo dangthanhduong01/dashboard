@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image → ASCII Art</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: rgba(255, 255, 255, 0.06);
+      --panel2: rgba(255, 255, 255, 0.09);
+      --border: rgba(255, 255, 255, 0.12);
+      --text: rgba(255, 255, 255, 0.92);
+      --muted: rgba(255, 255, 255, 0.65);
+      --accent: #7c3aed;
+      --accent2: #22d3ee;
+      --danger: #fb7185;
+      --shadow: 0 18px 60px rgba(0,0,0,0.45);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% 0%, rgba(124, 58, 237, 0.35), transparent 60%),
+        radial-gradient(900px 500px at 95% 15%, rgba(34, 211, 238, 0.25), transparent 55%),
+        radial-gradient(900px 700px at 20% 95%, rgba(236, 72, 153, 0.16), transparent 55%),
+        linear-gradient(180deg, #070a14, var(--bg));
+    }
+
+    header {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 18px 12px;
+    }
+
+    .title {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 34px);
+      letter-spacing: 0.2px;
+    }
+
+    .badge {
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.07);
+      color: var(--muted);
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+      max-width: 70ch;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    @media (min-width: 960px) {
+      .grid { grid-template-columns: 420px 1fr; }
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panelHeader {
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panelHeader h2 {
+      margin: 0;
+      font-size: 14px;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.82);
+    }
+
+    .panelBody { padding: 16px; }
+
+    .drop {
+      border: 1px dashed rgba(255,255,255,0.25);
+      border-radius: 14px;
+      padding: 14px;
+      background: rgba(0,0,0,0.12);
+    }
+
+    .drop.dragover {
+      border-color: rgba(34, 211, 238, 0.9);
+      box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.18);
+    }
+
+    .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+    .btn {
+      appearance: none;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.06));
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 650;
+      transition: transform .06s ease, border-color .2s ease, box-shadow .2s ease;
+      user-select: none;
+    }
+
+    .btn:hover { border-color: rgba(255,255,255,0.28); }
+    .btn:active { transform: translateY(1px); }
+
+    .btnPrimary {
+      border-color: rgba(124, 58, 237, 0.45);
+      background: linear-gradient(180deg, rgba(124, 58, 237, 0.35), rgba(124, 58, 237, 0.18));
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.16);
+    }
+
+    .btnDanger {
+      border-color: rgba(251, 113, 133, 0.45);
+      background: linear-gradient(180deg, rgba(251, 113, 133, 0.25), rgba(251, 113, 133, 0.12));
+    }
+
+    input[type="file"] { display: none; }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+
+    .previewWrap {
+      margin-top: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .preview {
+      width: 100%;
+      aspect-ratio: 4/3;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.20);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .preview img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .controls {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .control {
+      background: var(--panel2);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .control label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.80);
+      margin-bottom: 10px;
+    }
+
+    .control output { color: rgba(255,255,255,0.7); font-variant-numeric: tabular-nums; }
+
+    input[type="range"], select {
+      width: 100%;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.20);
+      color: var(--text);
+      outline: none;
+    }
+
+    .asciiPanel {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-height: 520px;
+    }
+
+    .asciiWrap {
+      padding: 12px;
+      height: 100%;
+    }
+
+    pre {
+      margin: 0;
+      height: 100%;
+      overflow: auto;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.25);
+      color: rgba(255,255,255,0.90);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      line-height: 1.05;
+      white-space: pre;
+      font-size: 12px;
+    }
+
+    .tools {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .srOnly {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    canvas { display: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title">
+      <h1>Image → ASCII Art</h1>
+      <span class="badge">Client-side • Không upload ảnh</span>
+    </div>
+    <p class="subtitle">
+      Ảnh quá nhiều màu/chi tiết (như ảnh bạn gửi) thường sẽ khó nhìn khi chỉ dùng độ sáng.
+      Thử các gợi ý: giảm width, tăng contrast, bật Edge, hoặc dùng charset dạng blocks.
+    </p>
+  </header>
+
+  <main>
+    <div class="grid">
+      <section class="panel">
+        <div class="panelHeader">
+          <h2>1) Nhập ảnh</h2>
+          <div class="tools">
+            <button class="btn" id="btnPick" type="button">Chọn ảnh</button>
+            <button class="btn btnDanger" id="btnClear" type="button">Xoá</button>
+            <input id="fileInput" type="file" accept="image/*" />
+          </div>
+        </div>
+
+        <div class="panelBody">
+          <div class="drop" id="dropZone" tabindex="0" aria-label="Khu vực kéo thả ảnh">
+            <div class="row">
+              <div>
+                <strong>Kéo-thả ảnh</strong>
+                <div class="hint">Hoặc bấm “Chọn ảnh”.</div>
+              </div>
+            </div>
+
+            <div class="previewWrap">
+              <div class="preview" id="preview">
+                <div class="small">Chưa có ảnh</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="controls">
+            <div class="control">
+              <label>
+                <span>Độ rộng (ký tự)</span>
+                <output id="outWidth">120</output>
+              </label>
+              <input id="rangeWidth" type="range" min="40" max="240" value="120" />
+              <div class="hint">Gợi ý: ảnh nhiều chi tiết → giảm còn ~80–120 để dễ nhìn.</div>
+            </div>
+
+            <div class="control">
+              <label>
+                <span>Độ tương phản</span>
+                <output id="outContrast">1.00</output>
+              </label>
+              <input id="rangeContrast" type="range" min="50" max="260" value="120" />
+              <div class="hint">Gợi ý: tăng 1.2–2.0 để nổi khối.</div>
+            </div>
+
+            <div class="control">
+              <label>
+                <span>Gamma</span>
+                <output id="outGamma">1.00</output>
+              </label>
+              <input id="rangeGamma" type="range" min="50" max="220" value="95" />
+              <div class="hint">Thường gamma ~0.8–1.1 tuỳ ảnh.</div>
+            </div>
+
+            <div class="control">
+              <label>
+                <span>Chế độ</span>
+                <output class="srOnly" id="outMode">&nbsp;</output>
+              </label>
+              <select id="modeSelect">
+                <option value="luma">Grayscale (luma)</option>
+                <option value="edge" selected>Edge (cạnh) — dễ nhìn hơn với ảnh nhiều màu</option>
+              </select>
+            </div>
+
+            <div class="control">
+              <label>
+                <span>Bộ ký tự</span>
+                <output class="srOnly" id="outCharset">&nbsp;</output>
+              </label>
+              <select id="charsetSelect">
+                <option value="blocks" selected>█▓▒░ </option>
+                <option value="complex">@%#*+=-:. </option>
+                <option value="simple">#*+=-:. </option>
+                <option value="binary">10 </option>
+              </select>
+              <div class="hint">Ảnh nhiều chi tiết → thử “blocks”.</div>
+            </div>
+
+            <div class="control">
+              <label>
+                <span>Font size</span>
+                <output id="outFont">12px</output>
+              </label>
+              <input id="rangeFont" type="range" min="8" max="20" value="12" />
+            </div>
+
+            <div class="control">
+              <label>
+                <span>Line height</span>
+                <output id="outLine">1.05</output>
+              </label>
+              <input id="rangeLine" type="range" min="90" max="150" value="105" />
+              <div class="hint">Nếu ASCII bị “dẹt”, tăng line-height một chút.</div>
+            </div>
+
+            <div class="control">
+              <label>
+                <span>Tùy chọn</span>
+                <span class="small">&nbsp;</span>
+              </label>
+              <div class="row" style="gap: 12px; align-items: center;">
+                <label class="small" style="display:flex; gap:8px; align-items:center;">
+                  <input id="chkInvert" type="checkbox" /> Đảo màu
+                </label>
+                <label class="small" style="display:flex; gap:8px; align-items:center;">
+                  <input id="chkMono" type="checkbox" checked /> Font monospace
+                </label>
+                <label class="small" style="display:flex; gap:8px; align-items:center;">
+                  <input id="chkAutoLevels" type="checkbox" checked /> Auto-levels
+                </label>
+              </div>
+              <div class="hint">Auto-levels giúp ảnh nhiều màu tăng tương phản tự nhiên.</div>
+            </div>
+
+            <div class="control">
+              <label>
+                <span>Tuỳ chọn nâng cao</span>
+                <span class="small">dithering</span>
+              </label>
+              <div class="row" style="gap: 12px; align-items: center;">
+                <label class="small" style="display:flex; gap:8px; align-items:center;">
+                  <input id="chkDither" type="checkbox" checked /> Floyd–Steinberg
+                </label>
+              </div>
+              <div style="margin-top: 10px;">
+                <label style="display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:13px; color: rgba(255,255,255,0.80); margin-bottom:10px;">
+                  <span>Độ mạnh dithering</span>
+                  <output id="outDither">0.75</output>
+                </label>
+                <input id="rangeDither" type="range" min="0" max="100" value="75" />
+                <div class="hint">Giảm nếu bị nhiễu; tăng nếu muốn cảm giác “mức xám” rõ hơn.</div>
+              </div>
+            </div>
+
+            <div class="control">
+              <label>
+                <span>Block size (px)</span>
+                <output id="outBlock">2×3</output>
+              </label>
+              <div class="row" style="gap: 10px; flex-wrap: nowrap;">
+                <input id="rangeBlockW" type="range" min="1" max="10" value="2" />
+                <input id="rangeBlockH" type="range" min="1" max="14" value="3" />
+              </div>
+              <div class="hint">Gom pixel theo khối (block) rồi lấy trung bình độ sáng → thường dễ nhìn và ít nhiễu hơn.</div>
+            </div>
+
+            <div class="control">
+              <label>
+                <span>Blur (giảm nhiễu)</span>
+                <output id="outBlur">0</output>
+              </label>
+              <input id="rangeBlur" type="range" min="0" max="6" value="0" />
+              <div class="hint">Ảnh neon nhiều chi tiết → thử blur 1–3 để “ra hình” rõ hơn và ít hạt.</div>
+            </div>
+
+            <div class="control">
+              <label>
+                <span>Blur type</span>
+                <span class="small">prefilter</span>
+              </label>
+              <select id="blurTypeSelect">
+                <option value="box" selected>Box blur (nhanh)</option>
+                <option value="gaussian">Gaussian blur (mượt)</option>
+              </select>
+            </div>
+
+            <div class="row">
+              <button class="btn btnPrimary" id="btnGenerate" type="button">Generate ASCII</button>
+              <button class="btn" id="btnCopy" type="button">Copy</button>
+              <span class="small" id="status"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel asciiPanel">
+        <div class="panelHeader">
+          <h2>2) ASCII art</h2>
+          <div class="tools">
+            <span class="small" id="meta">—</span>
+          </div>
+        </div>
+        <div class="asciiWrap">
+          <pre id="asciiOut">Chọn một ảnh để bắt đầu…</pre>
+        </div>
+      </section>
+    </div>
+
+    <canvas id="canvas"></canvas>
+  </main>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const btnPick = document.getElementById('btnPick');
+    const btnClear = document.getElementById('btnClear');
+    const btnGenerate = document.getElementById('btnGenerate');
+    const btnCopy = document.getElementById('btnCopy');
+    const dropZone = document.getElementById('dropZone');
+    const preview = document.getElementById('preview');
+    const asciiOut = document.getElementById('asciiOut');
+
+    const rangeWidth = document.getElementById('rangeWidth');
+    const outWidth = document.getElementById('outWidth');
+    const rangeContrast = document.getElementById('rangeContrast');
+    const outContrast = document.getElementById('outContrast');
+    const rangeGamma = document.getElementById('rangeGamma');
+    const outGamma = document.getElementById('outGamma');
+
+    const rangeFont = document.getElementById('rangeFont');
+    const outFont = document.getElementById('outFont');
+    const rangeLine = document.getElementById('rangeLine');
+    const outLine = document.getElementById('outLine');
+
+    const modeSelect = document.getElementById('modeSelect');
+    const charsetSelect = document.getElementById('charsetSelect');
+    const chkInvert = document.getElementById('chkInvert');
+    const chkMono = document.getElementById('chkMono');
+    const chkAutoLevels = document.getElementById('chkAutoLevels');
+    const chkDither = document.getElementById('chkDither');
+    const rangeDither = document.getElementById('rangeDither');
+    const outDither = document.getElementById('outDither');
+
+    const rangeBlockW = document.getElementById('rangeBlockW');
+    const rangeBlockH = document.getElementById('rangeBlockH');
+    const outBlock = document.getElementById('outBlock');
+    const rangeBlur = document.getElementById('rangeBlur');
+    const outBlur = document.getElementById('outBlur');
+    const blurTypeSelect = document.getElementById('blurTypeSelect');
+
+    const statusEl = document.getElementById('status');
+    const metaEl = document.getElementById('meta');
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    const CHARSETS = {
+      complex: '@%#*+=-:. ',
+      simple: '#*+=-:. ',
+      blocks: '█▓▒░ ',
+      binary: '10 ',
+    };
+
+    let sourceImage = null;
+
+    function setStatus(msg, type = 'info') {
+      statusEl.textContent = msg || '';
+      statusEl.style.color = type === 'error' ? 'var(--danger)' : 'rgba(255,255,255,0.65)';
+    }
+
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function updateLabels() {
+      outWidth.textContent = String(rangeWidth.value);
+      outContrast.textContent = (Number(rangeContrast.value) / 100).toFixed(2);
+      outGamma.textContent = (Number(rangeGamma.value) / 100).toFixed(2);
+      outFont.textContent = `${rangeFont.value}px`;
+      outLine.textContent = (Number(rangeLine.value) / 100).toFixed(2);
+      outDither.textContent = (Number(rangeDither.value) / 100).toFixed(2);
+      outBlock.textContent = `${rangeBlockW.value}×${rangeBlockH.value}`;
+      outBlur.textContent = String(rangeBlur.value);
+
+      asciiOut.style.fontSize = `${rangeFont.value}px`;
+      asciiOut.style.lineHeight = (Number(rangeLine.value) / 100).toFixed(2);
+    }
+
+    updateLabels();
+
+    btnPick.addEventListener('click', () => fileInput.click());
+
+    btnClear.addEventListener('click', () => {
+      fileInput.value = '';
+      sourceImage = null;
+      preview.innerHTML = '<div class="small">Chưa có ảnh</div>';
+      asciiOut.textContent = 'Chọn một ảnh để bắt đầu…';
+      metaEl.textContent = '—';
+      setStatus('');
+    });
+
+    [rangeWidth, rangeContrast, rangeGamma, rangeFont, rangeLine, modeSelect, charsetSelect, chkInvert, chkAutoLevels, chkDither, rangeDither, rangeBlockW, rangeBlockH, rangeBlur, blurTypeSelect].forEach((el) => {
+      el.addEventListener('input', () => {
+        updateLabels();
+        if (sourceImage) scheduleGenerate();
+      });
+    });
+
+    chkMono.addEventListener('change', () => {
+      asciiOut.style.fontFamily = chkMono.checked
+        ? 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace'
+        : 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial';
+    });
+
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      loadFile(file);
+    });
+
+    function loadFile(file) {
+      if (!file.type.startsWith('image/')) {
+        setStatus('File không phải ảnh.', 'error');
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        sourceImage = img;
+        preview.innerHTML = '';
+        preview.appendChild(img);
+        setStatus('Đã load ảnh.');
+        scheduleGenerate(true);
+      };
+      img.onerror = () => setStatus('Không thể load ảnh.', 'error');
+      img.src = url;
+    }
+
+    // Drag & drop
+    ;['dragenter', 'dragover'].forEach((evt) => {
+      dropZone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.add('dragover');
+      });
+    });
+    ;['dragleave', 'drop'].forEach((evt) => {
+      dropZone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.remove('dragover');
+      });
+    });
+    dropZone.addEventListener('drop', (e) => {
+      const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (file) loadFile(file);
+    });
+
+    btnGenerate.addEventListener('click', () => {
+      if (!sourceImage) return setStatus('Vui lòng chọn ảnh trước.', 'error');
+      generateASCII(true);
+    });
+
+    btnCopy.addEventListener('click', async () => {
+      const text = asciiOut.textContent || '';
+      if (!text.trim()) return setStatus('Chưa có ASCII để copy.', 'error');
+      try {
+        await navigator.clipboard.writeText(text);
+        setStatus('Đã copy vào clipboard!');
+      } catch {
+        setStatus('Copy thất bại (trình duyệt chặn).', 'error');
+      }
+    });
+
+    let rafId = 0;
+    function scheduleGenerate(force = false) {
+      if (!sourceImage) return;
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        rafId = 0;
+        generateASCII(force);
+      });
+    }
+
+    function autoLevels(values) {
+      // values in [0..1]
+      let min = 1;
+      let max = 0;
+      for (let i = 0; i < values.length; i++) {
+        const v = values[i];
+        if (v < min) min = v;
+        if (v > max) max = v;
+      }
+      // avoid divide by zero
+      const range = Math.max(1e-6, max - min);
+      const out = new Float32Array(values.length);
+      for (let i = 0; i < values.length; i++) {
+        out[i] = clamp((values[i] - min) / range, 0, 1);
+      }
+      return out;
+    }
+
+    function ditherFloydSteinberg(lum, w, h, strength) {
+      // In-place dithering on a copy; values are in [0..1]
+      const out = new Float32Array(lum);
+      const s = clamp(strength, 0, 1);
+
+      // quantize to levels matching charset length (capped for performance)
+      return function apply(levels) {
+        const n = Math.max(2, levels | 0);
+        const step = 1 / (n - 1);
+
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            const i = y * w + x;
+            const oldV = out[i];
+            const newV = Math.round(oldV / step) * step;
+            const err = (oldV - newV) * s;
+            out[i] = clamp(newV, 0, 1);
+
+            // distribute error
+            if (x + 1 < w) out[i + 1] = clamp(out[i + 1] + err * 7 / 16, 0, 1);
+            if (y + 1 < h) {
+              if (x > 0) out[i + w - 1] = clamp(out[i + w - 1] + err * 3 / 16, 0, 1);
+              out[i + w] = clamp(out[i + w] + err * 5 / 16, 0, 1);
+              if (x + 1 < w) out[i + w + 1] = clamp(out[i + w + 1] + err * 1 / 16, 0, 1);
+            }
+          }
+        }
+        return out;
+      };
+    }
+
+    function buildLumaGridFromImageData(data, w, h) {
+      const lum = new Float32Array(w * h);
+      for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+        const r = data[i] / 255;
+        const g = data[i + 1] / 255;
+        const b = data[i + 2] / 255;
+        lum[p] = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      }
+      return lum;
+    }
+
+    function blockAverageLuma(lum, w, h, bw, bh) {
+      const outW = Math.max(1, Math.floor(w / bw));
+      const outH = Math.max(1, Math.floor(h / bh));
+      const out = new Float32Array(outW * outH);
+
+      for (let by = 0; by < outH; by++) {
+        const y0 = by * bh;
+        const y1 = Math.min(h, y0 + bh);
+        for (let bx = 0; bx < outW; bx++) {
+          const x0 = bx * bw;
+          const x1 = Math.min(w, x0 + bw);
+
+          let sum = 0;
+          let cnt = 0;
+          for (let y = y0; y < y1; y++) {
+            let row = y * w;
+            for (let x = x0; x < x1; x++) {
+              sum += lum[row + x];
+              cnt++;
+            }
+          }
+          out[by * outW + bx] = cnt ? (sum / cnt) : 0;
+        }
+      }
+
+      return { out, outW, outH };
+    }
+
+    function boxBlurRGBAInPlace(data, w, h, radius) {
+      // Simple separable box blur (two passes). radius=0 => no-op.
+      const r = radius | 0;
+      if (r <= 0) return;
+
+      const tmp = new Uint8ClampedArray(data.length);
+      const window = 2 * r + 1;
+
+      // Horizontal pass
+      for (let y = 0; y < h; y++) {
+        let rs = 0, gs = 0, bs = 0, as = 0;
+        const row = y * w;
+
+        // init window
+        for (let ix = -r; ix <= r; ix++) {
+          const x = clamp(ix, 0, w - 1);
+          const i = (row + x) * 4;
+          rs += data[i];
+          gs += data[i + 1];
+          bs += data[i + 2];
+          as += data[i + 3];
+        }
+
+        for (let x = 0; x < w; x++) {
+          const outI = (row + x) * 4;
+          tmp[outI] = (rs / window) | 0;
+          tmp[outI + 1] = (gs / window) | 0;
+          tmp[outI + 2] = (bs / window) | 0;
+          tmp[outI + 3] = (as / window) | 0;
+
+          const xRemove = clamp(x - r, 0, w - 1);
+          const xAdd = clamp(x + r + 1, 0, w - 1);
+          const iRemove = (row + xRemove) * 4;
+          const iAdd = (row + xAdd) * 4;
+
+          rs += data[iAdd] - data[iRemove];
+          gs += data[iAdd + 1] - data[iRemove + 1];
+          bs += data[iAdd + 2] - data[iRemove + 2];
+          as += data[iAdd + 3] - data[iRemove + 3];
+        }
+      }
+
+      // Vertical pass
+      for (let x = 0; x < w; x++) {
+        let rs = 0, gs = 0, bs = 0, as = 0;
+
+        for (let iy = -r; iy <= r; iy++) {
+          const y = clamp(iy, 0, h - 1);
+          const i = (y * w + x) * 4;
+          rs += tmp[i];
+          gs += tmp[i + 1];
+          bs += tmp[i + 2];
+          as += tmp[i + 3];
+        }
+
+        for (let y = 0; y < h; y++) {
+          const outI = (y * w + x) * 4;
+          data[outI] = (rs / window) | 0;
+          data[outI + 1] = (gs / window) | 0;
+          data[outI + 2] = (bs / window) | 0;
+          data[outI + 3] = (as / window) | 0;
+
+          const yRemove = clamp(y - r, 0, h - 1);
+          const yAdd = clamp(y + r + 1, 0, h - 1);
+          const iRemove = (yRemove * w + x) * 4;
+          const iAdd = (yAdd * w + x) * 4;
+
+          rs += tmp[iAdd] - tmp[iRemove];
+          gs += tmp[iAdd + 1] - tmp[iRemove + 1];
+          bs += tmp[iAdd + 2] - tmp[iRemove + 2];
+          as += tmp[iAdd + 3] - tmp[iRemove + 3];
+        }
+      }
+    }
+
+    function buildGaussianKernel1D(radius) {
+      // radius ~ number of pixels on each side (0..6)
+      const r = radius | 0;
+      if (r <= 0) return { kernel: new Float32Array([1]), sum: 1 };
+
+      // sigma heuristic: works well for small radii
+      const sigma = Math.max(0.8, r / 2);
+      const size = 2 * r + 1;
+      const kernel = new Float32Array(size);
+
+      let sum = 0;
+      for (let i = -r; i <= r; i++) {
+        const v = Math.exp(-(i * i) / (2 * sigma * sigma));
+        kernel[i + r] = v;
+        sum += v;
+      }
+
+      return { kernel, sum };
+    }
+
+    function gaussianBlurRGBAInPlace(data, w, h, radius) {
+      const r = radius | 0;
+      if (r <= 0) return;
+
+      const { kernel, sum } = buildGaussianKernel1D(r);
+      const tmp = new Uint8ClampedArray(data.length);
+
+      // Horizontal
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          let rs = 0, gs = 0, bs = 0, as = 0;
+          for (let k = -r; k <= r; k++) {
+            const xx = clamp(x + k, 0, w - 1);
+            const i = (y * w + xx) * 4;
+            const kv = kernel[k + r];
+            rs += data[i] * kv;
+            gs += data[i + 1] * kv;
+            bs += data[i + 2] * kv;
+            as += data[i + 3] * kv;
+          }
+          const o = (y * w + x) * 4;
+          tmp[o] = (rs / sum) | 0;
+          tmp[o + 1] = (gs / sum) | 0;
+          tmp[o + 2] = (bs / sum) | 0;
+          tmp[o + 3] = (as / sum) | 0;
+        }
+      }
+
+      // Vertical
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          let rs = 0, gs = 0, bs = 0, as = 0;
+          for (let k = -r; k <= r; k++) {
+            const yy = clamp(y + k, 0, h - 1);
+            const i = (yy * w + x) * 4;
+            const kv = kernel[k + r];
+            rs += tmp[i] * kv;
+            gs += tmp[i + 1] * kv;
+            bs += tmp[i + 2] * kv;
+            as += tmp[i + 3] * kv;
+          }
+          const o = (y * w + x) * 4;
+          data[o] = (rs / sum) | 0;
+          data[o + 1] = (gs / sum) | 0;
+          data[o + 2] = (bs / sum) | 0;
+          data[o + 3] = (as / sum) | 0;
+        }
+      }
+    }
+
+    function generateASCII(force = false) {
+      const img = sourceImage;
+      if (!img) return;
+
+      const outWChars = Number(rangeWidth.value);
+      const charAspect = 0.55;
+
+      // Instead of 1 char = 1 pixel, we render an intermediate image,
+      // then compute block averages per character cell.
+      const blockW = Number(rangeBlockW.value);
+      const blockH = Number(rangeBlockH.value);
+
+      // internal render size in pixels
+      const renderW = Math.max(1, outWChars * blockW);
+      const scale = renderW / img.naturalWidth;
+      const renderH = Math.max(1, Math.round(img.naturalHeight * scale * charAspect * blockH));
+
+      canvas.width = renderW;
+      canvas.height = renderH;
+      ctx.clearRect(0, 0, renderW, renderH);
+      ctx.drawImage(img, 0, 0, renderW, renderH);
+
+      const imageData = ctx.getImageData(0, 0, renderW, renderH);
+      const blurRadius = Number(rangeBlur.value) | 0;
+      const blurType = blurTypeSelect.value;
+      if (blurRadius > 0) {
+        if (blurType === 'gaussian') {
+          gaussianBlurRGBAInPlace(imageData.data, renderW, renderH, blurRadius);
+        } else {
+          boxBlurRGBAInPlace(imageData.data, renderW, renderH, blurRadius);
+        }
+        ctx.putImageData(imageData, 0, 0);
+      }
+
+      const { data } = imageData;
+
+      const contrast = Number(rangeContrast.value) / 100;
+      const gamma = Number(rangeGamma.value) / 100;
+      const invert = chkInvert.checked;
+      const mode = modeSelect.value;
+      const charset = CHARSETS[charsetSelect.value] || CHARSETS.complex;
+      const ditherOn = chkDither.checked;
+      const ditherStrength = Number(rangeDither.value) / 100;
+
+      let ascii = '';
+
+      if (mode === 'edge') {
+        // Edge mode: compute luma pixels, then Sobel on pixel grid (renderW x renderH),
+        // then block-average magnitude into character cells.
+        const lumPx = buildLumaGridFromImageData(data, renderW, renderH);
+        const lumPx2 = chkAutoLevels.checked ? autoLevels(lumPx) : lumPx;
+
+        const gxK = [-1, 0, 1, -2, 0, 2, -1, 0, 1];
+        const gyK = [-1, -2, -1, 0, 0, 0, 1, 2, 1];
+        const mag = new Float32Array(renderW * renderH);
+
+        for (let y = 0; y < renderH; y++) {
+          for (let x = 0; x < renderW; x++) {
+            let gx = 0;
+            let gy = 0;
+            if (x !== 0 && y !== 0 && x !== renderW - 1 && y !== renderH - 1) {
+              let k = 0;
+              for (let ky = -1; ky <= 1; ky++) {
+                for (let kx = -1; kx <= 1; kx++) {
+                  const v = lumPx2[(y + ky) * renderW + (x + kx)];
+                  gx += v * gxK[k];
+                  gy += v * gyK[k];
+                  k++;
+                }
+              }
+            }
+            let m = Math.sqrt(gx * gx + gy * gy);
+            // edge normalization / contrast
+            m = clamp(m * 1.35 * contrast, 0, 1);
+            m = Math.pow(m, gamma);
+            if (invert) m = 1 - m;
+            mag[y * renderW + x] = m;
+          }
+        }
+
+        const { out: magBlocks, outW, outH } = blockAverageLuma(mag, renderW, renderH, blockW, blockH);
+
+        for (let y = 0; y < outH; y++) {
+          for (let x = 0; x < outW; x++) {
+            const v = magBlocks[y * outW + x];
+            const idx = Math.floor(v * (charset.length - 1));
+            // stronger edge -> denser char (reverse mapping)
+            ascii += charset[charset.length - 1 - idx];
+          }
+          ascii += '\n';
+        }
+
+        asciiOut.textContent = ascii;
+        metaEl.textContent = `${outW}×${outH} chars • block: ${blockW}×${blockH} px • blur: ${blurType}(${blurRadius}) • charset: ${charsetSelect.value} • mode: edge`;
+        if (force) setStatus('Đã generate ASCII.');
+        return;
+      }
+
+      // Luma mode: average in blocks, then map to charset.
+      const lumPx = buildLumaGridFromImageData(data, renderW, renderH);
+      let lumPx2 = chkAutoLevels.checked ? autoLevels(lumPx) : lumPx;
+
+      // Apply contrast/gamma/invert on pixel luma first, then block-average.
+      const lumAdj = new Float32Array(lumPx2.length);
+      for (let i = 0; i < lumPx2.length; i++) {
+        let v = lumPx2[i];
+        v = (v - 0.5) * contrast + 0.5;
+        v = clamp(v, 0, 1);
+        v = Math.pow(v, gamma);
+        if (invert) v = 1 - v;
+        lumAdj[i] = v;
+      }
+
+      const { out: lumBlocks, outW, outH } = blockAverageLuma(lumAdj, renderW, renderH, blockW, blockH);
+
+      // Optional dithering at character-cell level
+      let lumFinal = lumBlocks;
+      if (ditherOn) {
+        const apply = ditherFloydSteinberg(lumBlocks, outW, outH, ditherStrength);
+        lumFinal = apply(charset.length);
+      }
+
+      for (let y = 0; y < outH; y++) {
+        for (let x = 0; x < outW; x++) {
+          const v = lumFinal[y * outW + x];
+          const idx = Math.floor((1 - v) * (charset.length - 1));
+          ascii += charset[idx];
+        }
+        ascii += '\n';
+      }
+
+      asciiOut.textContent = ascii;
+      metaEl.textContent = `${outW}×${outH} chars • block: ${blockW}×${blockH} px • blur: ${blurType}(${blurRadius}) • charset: ${charsetSelect.value} • mode: luma • auto-levels: ${chkAutoLevels.checked ? 'on' : 'off'} • dither: ${ditherOn ? 'on' : 'off'}`;
+      if (force) setStatus('Đã generate ASCII.');
+    }
+  </script>
+</body>
+</html>
