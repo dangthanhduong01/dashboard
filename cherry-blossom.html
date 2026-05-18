@@ -1,330 +1,475 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hoa Anh Đào Rơi</title>
+    <title data-i18n="cherry.title">Cherry Blossom Water</title>
     <style>
+        :root {
+            --petal-soft: #ffd6e6;
+            --petal-mid: #ff9ec7;
+            --petal-deep: #ef5f9b;
+            --water-line: rgba(184, 210, 255, 0.12);
+            --water-glow: rgba(255, 189, 219, 0.22);
+        }
+
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
 
+        html,
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            overflow: hidden;
-            font-family: 'Arial', sans-serif;
-            height: 100vh;
-            position: relative;
-        }
-
-        .container {
-            position: relative;
             width: 100%;
-            height: 100vh;
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
             overflow: hidden;
+            background: #020306;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            cursor: crosshair;
+            user-select: none;
         }
 
-        .title {
+        .scene {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            isolation: isolate;
+            overflow: hidden;
+            background:
+                radial-gradient(900px 520px at 50% 112%, rgba(255, 176, 212, 0.14), transparent 68%),
+                radial-gradient(700px 420px at 12% 5%, rgba(70, 102, 148, 0.16), transparent 60%),
+                radial-gradient(820px 460px at 88% 18%, rgba(106, 43, 78, 0.12), transparent 58%),
+                linear-gradient(180deg, #05070d 0%, #010204 54%, #000 100%);
+        }
+
+        .scene::before,
+        .scene::after {
+            content: "";
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            z-index: 10;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            inset: -20%;
+            pointer-events: none;
+            z-index: 0;
         }
 
-        .title h1 {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            animation: fadeIn 2s ease-in;
+        .scene::before {
+            opacity: 0.5;
+            background:
+                repeating-linear-gradient(
+                    178deg,
+                    transparent 0 28px,
+                    var(--water-line) 29px 30px,
+                    transparent 31px 58px
+                );
+            transform: perspective(680px) rotateX(66deg) translateY(18vh);
+            transform-origin: 50% 100%;
+            animation: waterDrift 8s linear infinite;
         }
 
-        .title p {
-            font-size: 1.5rem;
-            animation: fadeIn 3s ease-in;
+        .scene::after {
+            opacity: 0.42;
+            background:
+                radial-gradient(ellipse at 50% 82%, rgba(255, 204, 226, 0.2), transparent 45%),
+                linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+            mix-blend-mode: screen;
+            animation: shimmer 5.5s ease-in-out infinite alternate;
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        #waterCanvas {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+
+        .petal-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            overflow: hidden;
         }
 
         .petal {
             position: absolute;
-            width: 20px;
-            height: 20px;
-            background: radial-gradient(ellipse at center, #ffb7d5 0%, #ffa0c9 50%, #ff85b8 100%);
-            border-radius: 50% 0 50% 0;
-            opacity: 0.8;
-            animation: fall linear infinite;
-            filter: drop-shadow(0 0 3px rgba(255, 192, 203, 0.6));
+            top: -12vh;
+            left: var(--x);
+            width: var(--size);
+            height: calc(var(--size) * 0.72);
+            border-radius: 72% 18% 78% 22%;
+            opacity: var(--opacity);
+            background:
+                radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.92) 0 8%, transparent 28%),
+                radial-gradient(ellipse at 68% 74%, rgba(232, 66, 126, 0.34), transparent 54%),
+                linear-gradient(135deg, var(--petal-soft), var(--petal-mid) 58%, var(--petal-deep));
+            filter:
+                drop-shadow(0 0 5px rgba(255, 158, 199, 0.22))
+                drop-shadow(0 12px 16px rgba(0, 0, 0, 0.35));
+            transform-origin: 30% 60%;
+            animation:
+                fall var(--duration) linear var(--delay) forwards,
+                flutter var(--flutter) ease-in-out var(--delay) infinite;
         }
 
         .petal::before {
-            content: '';
+            content: "";
             position: absolute;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.5) 0%, transparent 70%);
-            border-radius: 50% 0 50% 0;
+            width: 56%;
+            height: 8%;
+            left: 11%;
+            bottom: 13%;
+            border-radius: 999px;
+            background: rgba(169, 42, 89, 0.34);
+            transform: rotate(-31deg);
+            transform-origin: left center;
+        }
+
+        .petal::after {
+            content: "";
+            position: absolute;
+            width: 28%;
+            height: 24%;
+            right: -5%;
+            bottom: -4%;
+            border-radius: 70% 22% 70% 20%;
+            background: rgba(255, 218, 234, 0.58);
+            transform: rotate(20deg);
+        }
+
+        .ripple {
+            position: absolute;
+            z-index: 3;
+            left: var(--x);
+            top: var(--y);
+            width: 18px;
+            height: 18px;
+            border: 1px solid rgba(255, 214, 233, 0.86);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%) scale(0.2);
+            box-shadow:
+                0 0 22px rgba(255, 151, 199, 0.4),
+                inset 0 0 18px rgba(177, 209, 255, 0.16);
+            animation: ripple 1.35s ease-out forwards;
+        }
+
+        .ripple.delay {
+            animation-delay: 0.12s;
+            border-color: rgba(160, 192, 255, 0.55);
+        }
+
+        .touch-glow {
+            position: absolute;
+            z-index: 3;
+            left: var(--x);
+            top: var(--y);
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(255, 230, 241, 0.92), rgba(255, 121, 180, 0.28) 42%, transparent 70%);
+            animation: touchGlow 0.8s ease-out forwards;
+        }
+
+        .hint {
+            position: absolute;
+            right: 18px;
+            bottom: 16px;
+            z-index: 4;
+            margin: 0;
+            color: rgba(255, 239, 247, 0.58);
+            font-size: 13px;
+            letter-spacing: 0;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+        }
+
+        .lang-toggle {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            z-index: 5;
+            border: 1px solid rgba(255, 214, 233, 0.42);
+            border-radius: 999px;
+            padding: 8px 12px;
+            color: rgba(255, 239, 247, 0.86);
+            background: rgba(0, 0, 0, 0.28);
+            cursor: pointer;
+            font: 700 12px/1 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            box-shadow: 0 0 18px rgba(255, 151, 199, 0.16);
+            backdrop-filter: blur(6px);
+        }
+
+        @keyframes waterDrift {
+            from {
+                background-position: 0 0;
+            }
+            to {
+                background-position: 0 116px;
+            }
+        }
+
+        @keyframes shimmer {
+            from {
+                transform: translateX(-4%) skewX(-8deg);
+            }
+            to {
+                transform: translateX(4%) skewX(8deg);
+            }
         }
 
         @keyframes fall {
             0% {
-                transform: translateY(-100px) rotate(0deg) translateX(0);
-                opacity: 1;
+                transform: translate3d(0, -12vh, 0) rotate(var(--rotate-start));
+            }
+            24% {
+                opacity: var(--opacity);
+            }
+            78% {
+                opacity: var(--opacity);
             }
             100% {
-                transform: translateY(100vh) rotate(720deg) translateX(100px);
-                opacity: 0.3;
+                transform: translate3d(var(--drift), 116vh, 0) rotate(var(--rotate-end));
+                opacity: 0;
             }
         }
 
-        @keyframes sway {
-            0%, 100% {
-                transform: translateX(0);
+        @keyframes flutter {
+            0%,
+            100% {
+                margin-left: 0;
             }
             50% {
-                transform: translateX(50px);
+                margin-left: var(--sway);
             }
         }
 
-        /* Tree branch decoration */
-        .branch {
-            position: absolute;
-            width: 3px;
-            height: 200px;
-            background: linear-gradient(to bottom, #4a3728, #3d2a1f);
-            transform-origin: top center;
-            border-radius: 2px;
+        @keyframes ripple {
+            0% {
+                opacity: 0.95;
+                transform: translate(-50%, -50%) scale(0.2);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(13);
+            }
         }
 
-        .branch1 {
-            top: -50px;
-            left: 10%;
-            transform: rotate(15deg);
+        @keyframes touchGlow {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(0.4);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(8);
+            }
         }
 
-        .branch2 {
-            top: -30px;
-            right: 15%;
-            transform: rotate(-20deg);
+        @media (max-width: 700px) {
+            .hint {
+                left: 14px;
+                right: 14px;
+                text-align: center;
+                font-size: 12px;
+            }
         }
 
-        .branch3 {
-            top: 100px;
-            left: 5%;
-            transform: rotate(10deg);
-        }
-
-        .branch4 {
-            top: 80px;
-            right: 8%;
-            transform: rotate(-15deg);
-        }
-
-        /* Flower clusters on branches */
-        .flower-cluster {
-            position: absolute;
-            display: flex;
-            gap: 5px;
-        }
-
-        .flower {
-            width: 25px;
-            height: 25px;
-            position: relative;
-        }
-
-        .flower .petal-static {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: #ffb7d5;
-            border-radius: 50%;
-            opacity: 0.9;
-        }
-
-        .flower .petal-static:nth-child(1) { top: 0; left: 50%; transform: translateX(-50%); }
-        .flower .petal-static:nth-child(2) { top: 50%; right: 0; transform: translateY(-50%); }
-        .flower .petal-static:nth-child(3) { bottom: 0; left: 50%; transform: translateX(-50%); }
-        .flower .petal-static:nth-child(4) { top: 50%; left: 0; transform: translateY(-50%); }
-        .flower .petal-static:nth-child(5) { 
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%); 
-            background: #ffeb3b;
-            width: 6px;
-            height: 6px;
-        }
-
-        .stats {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            color: white;
-            background: rgba(0,0,0,0.3);
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            backdrop-filter: blur(5px);
+        @media (prefers-reduced-motion: reduce) {
+            .scene::before,
+            .scene::after,
+            .petal {
+                animation-duration: 18s;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container" id="container">
-        <!-- Branches -->
-        <div class="branch branch1">
-            <div class="flower-cluster" style="top: 50px; left: -20px;">
-                <div class="flower">
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                </div>
-                <div class="flower">
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                </div>
-            </div>
-        </div>
-        <div class="branch branch2">
-            <div class="flower-cluster" style="top: 60px; right: -20px;">
-                <div class="flower">
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                </div>
-                <div class="flower">
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                </div>
-            </div>
-        </div>
-        <div class="branch branch3">
-            <div class="flower-cluster" style="top: 80px; left: -15px;">
-                <div class="flower">
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                </div>
-            </div>
-        </div>
-        <div class="branch branch4">
-            <div class="flower-cluster" style="top: 70px; right: -15px;">
-                <div class="flower">
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                    <div class="petal-static"></div>
-                </div>
-            </div>
-        </div>
+    <main class="scene" id="scene" aria-label="Black water surface with falling cherry blossom petals" data-i18n-aria-label="cherry.aria">
+        <canvas id="waterCanvas"></canvas>
+        <div class="petal-layer" id="petalLayer"></div>
+        <button class="lang-toggle" type="button" data-lang-toggle>VI</button>
+        <p class="hint" data-i18n="cherry.hint">Click or touch the water</p>
+    </main>
 
-        <!-- Title -->
-        <div class="title">
-            <h1>🌸 Hoa Anh Đào 🌸</h1>
-            <p>Vẻ đẹp của mùa xuân</p>
-        </div>
-
-        <!-- Stats -->
-        <div class="stats">
-            <div>Cánh hoa: <span id="petalCount">0</span></div>
-            <div>Click để thêm cánh hoa! 🌸</div>
-        </div>
-    </div>
-
+    <script src="./i18n.js"></script>
     <script>
-        const container = document.getElementById('container');
-        const petalCountElement = document.getElementById('petalCount');
-        let petalCount = 0;
+        const scene = document.getElementById('scene');
+        const petalLayer = document.getElementById('petalLayer');
+        const canvas = document.getElementById('waterCanvas');
+        const ctx = canvas.getContext('2d');
+        const ripples = [];
+        const lanes = 15;
+        let width = 0;
+        let height = 0;
+        let deviceScale = 1;
+        let petalTimer = null;
 
-        // Function to create a petal
-        function createPetal(x, y) {
-            const petal = document.createElement('div');
+        function random(min, max) {
+            return min + Math.random() * (max - min);
+        }
+
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            deviceScale = Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = Math.floor(width * deviceScale);
+            canvas.height = Math.floor(height * deviceScale);
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            ctx.setTransform(deviceScale, 0, 0, deviceScale, 0, 0);
+        }
+
+        function createPetal(x, y, burst = false, preseed = false) {
+            const petal = document.createElement('span');
+            const size = burst ? random(12, 24) : random(14, 30);
+            const duration = burst ? random(3.2, 5.8) : random(8.5, 15.5);
+            const delay = preseed ? -random(0.4, duration * 0.86) : random(0, 1.7);
+            const laneWidth = width / lanes;
+            const lane = Math.floor(random(0, lanes));
+            const startX = x ?? lane * laneWidth + random(laneWidth * 0.12, laneWidth * 0.88);
+            const sway = burst ? random(-44, 44) : random(-30, 30);
+            const drift = burst ? random(-170, 170) : random(-90, 90);
+
             petal.className = 'petal';
-            
-            // Random starting position
-            const startX = x !== undefined ? x : Math.random() * window.innerWidth;
-            petal.style.left = startX + 'px';
-            petal.style.top = (y !== undefined ? y : -20) + 'px';
-            
-            // Random size variation
-            const size = 15 + Math.random() * 15;
-            petal.style.width = size + 'px';
-            petal.style.height = size + 'px';
-            
-            // Random animation duration
-            const duration = 8 + Math.random() * 8;
-            petal.style.animationDuration = duration + 's';
-            
-            // Random delay
-            const delay = Math.random() * 2;
-            petal.style.animationDelay = delay + 's';
-            
-            // Random horizontal movement
-            const xMovement = -50 + Math.random() * 100;
-            petal.style.setProperty('--x-movement', xMovement + 'px');
-            
-            container.appendChild(petal);
-            petalCount++;
-            petalCountElement.textContent = petalCount;
-            
-            // Remove petal after animation
-            setTimeout(() => {
-                petal.remove();
-                petalCount--;
-                petalCountElement.textContent = petalCount;
-            }, (duration + delay) * 1000);
-        }
+            petal.style.setProperty('--x', `${startX}px`);
+            petal.style.setProperty('--size', `${size}px`);
+            petal.style.setProperty('--duration', `${duration}s`);
+            petal.style.setProperty('--delay', burst ? '0s' : `${delay}s`);
+            petal.style.setProperty('--flutter', `${random(1.6, 3.4)}s`);
+            petal.style.setProperty('--sway', `${sway}px`);
+            petal.style.setProperty('--drift', `${drift}px`);
+            petal.style.setProperty('--rotate-start', `${random(-120, 120)}deg`);
+            petal.style.setProperty('--rotate-end', `${random(560, 1120)}deg`);
+            petal.style.setProperty('--opacity', burst ? random(0.72, 0.98) : random(0.5, 0.88));
 
-        // Create petals periodically
-        function startPetalRain() {
-            setInterval(() => {
-                createPetal();
-            }, 300);
-        }
-
-        // Create burst of petals on click
-        container.addEventListener('click', (e) => {
-            for (let i = 0; i < 10; i++) {
-                setTimeout(() => {
-                    createPetal(
-                        e.clientX + (Math.random() - 0.5) * 100,
-                        e.clientY
-                    );
-                }, i * 50);
+            if (typeof y === 'number') {
+                petal.style.top = `${y + height * 0.12}px`;
             }
+
+            petalLayer.appendChild(petal);
+            petal.addEventListener('animationend', () => petal.remove(), { once: true });
+        }
+
+        function createRows() {
+            const amount = width < 720 ? 3 : 5;
+            for (let i = 0; i < amount; i++) {
+                window.setTimeout(createPetal, i * 120);
+            }
+        }
+
+        function startPetalRain() {
+            if (petalTimer) {
+                window.clearInterval(petalTimer);
+            }
+            createRows();
+            petalTimer = window.setInterval(createRows, width < 720 ? 760 : 520);
+        }
+
+        function addRipple(x, y) {
+            ripples.push({
+                x,
+                y,
+                radius: 6,
+                alpha: 1,
+                speed: random(2.3, 3.2),
+                wobble: random(0, Math.PI * 2)
+            });
+
+            for (let i = 0; i < 2; i++) {
+                const ring = document.createElement('span');
+                ring.className = `ripple${i ? ' delay' : ''}`;
+                ring.style.setProperty('--x', `${x}px`);
+                ring.style.setProperty('--y', `${y}px`);
+                scene.appendChild(ring);
+                ring.addEventListener('animationend', () => ring.remove(), { once: true });
+            }
+
+            const glow = document.createElement('span');
+            glow.className = 'touch-glow';
+            glow.style.setProperty('--x', `${x}px`);
+            glow.style.setProperty('--y', `${y}px`);
+            scene.appendChild(glow);
+            glow.addEventListener('animationend', () => glow.remove(), { once: true });
+
+            for (let i = 0; i < 9; i++) {
+                window.setTimeout(() => createPetal(x + random(-42, 42), y + random(-30, 16), true), i * 35);
+            }
+        }
+
+        function drawWater() {
+            ctx.clearRect(0, 0, width, height);
+            const now = performance.now() * 0.001;
+
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+
+            for (let i = ripples.length - 1; i >= 0; i--) {
+                const ripple = ripples[i];
+                ripple.radius += ripple.speed;
+                ripple.alpha *= 0.974;
+
+                const gradient = ctx.createRadialGradient(
+                    ripple.x,
+                    ripple.y,
+                    Math.max(1, ripple.radius * 0.7),
+                    ripple.x,
+                    ripple.y,
+                    ripple.radius
+                );
+                gradient.addColorStop(0, `rgba(255, 189, 219, 0)`);
+                gradient.addColorStop(0.6, `rgba(255, 206, 230, ${0.18 * ripple.alpha})`);
+                gradient.addColorStop(1, `rgba(118, 167, 255, ${0.06 * ripple.alpha})`);
+
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = 1.5 + ripple.alpha * 2.2;
+                ctx.beginPath();
+
+                const steps = 96;
+                for (let j = 0; j <= steps; j++) {
+                    const angle = (j / steps) * Math.PI * 2;
+                    const wave = Math.sin(angle * 9 + now * 5 + ripple.wobble) * 3.4 * ripple.alpha;
+                    const rx = ripple.x + Math.cos(angle) * (ripple.radius + wave);
+                    const ry = ripple.y + Math.sin(angle) * (ripple.radius * 0.34 + wave);
+                    if (j === 0) {
+                        ctx.moveTo(rx, ry);
+                    } else {
+                        ctx.lineTo(rx, ry);
+                    }
+                }
+
+                ctx.closePath();
+                ctx.stroke();
+
+                if (ripple.alpha < 0.025 || ripple.radius > Math.max(width, height) * 0.85) {
+                    ripples.splice(i, 1);
+                }
+            }
+
+            ctx.restore();
+            requestAnimationFrame(drawWater);
+        }
+
+        scene.addEventListener('pointerdown', (event) => {
+            addRipple(event.clientX, event.clientY);
         });
 
-        // Start the petal rain
-        startPetalRain();
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            startPetalRain();
+        });
 
-        // Create initial petals
-        for (let i = 0; i < 20; i++) {
-            setTimeout(() => createPetal(), i * 200);
+        resizeCanvas();
+        startPetalRain();
+        drawWater();
+
+        for (let i = 0; i < 42; i++) {
+            window.setTimeout(() => createPetal(undefined, undefined, false, true), i * 45);
         }
     </script>
 </body>

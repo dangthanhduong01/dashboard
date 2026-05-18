@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -42,6 +42,7 @@
       align-items: baseline;
       gap: 12px;
       flex-wrap: wrap;
+      justify-content: space-between;
     }
 
     h1 {
@@ -59,6 +60,16 @@
       color: var(--muted);
     }
 
+    .langToggle {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: var(--text);
+      background: rgba(255,255,255,0.07);
+      cursor: pointer;
+      font-weight: 700;
+    }
+
     .subtitle {
       margin: 10px 0 0;
       color: var(--muted);
@@ -72,43 +83,58 @@
       padding: 18px;
     }
 
+    /* Layout: back to horizontal split (2 : 10) */
     .grid {
       display: grid;
       grid-template-columns: 1fr;
+      grid-template-rows: auto auto;
       gap: 16px;
     }
 
-    @media (min-width: 960px) {
-      .grid { grid-template-columns: 420px 1fr; }
+    /* Remove sticky behavior when stacked */
+    .grid > section.panel:first-child {
+      position: static;
+      max-height: none;
+      display: block;
+      z-index: auto;
     }
 
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
+    .grid > section.panel:first-child .panelBody {
+      overflow: visible;
     }
 
-    .panelHeader {
-      padding: 14px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
-      border-bottom: 1px solid var(--border);
+    .asciiPanel {
+      min-height: auto;
     }
 
-    .panelHeader h2 {
+    pre {
       margin: 0;
-      font-size: 14px;
-      letter-spacing: 0.4px;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.82);
+      height: auto;
+      max-height: 75vh;
+      overflow: auto;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.25);
+      color: rgba(255,255,255,0.90);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      line-height: 1.05;
+      white-space: pre;
+      font-size: 12px;
     }
 
-    .panelBody { padding: 16px; }
+    @media (max-width: 959px) {
+      .grid { grid-template-columns: 1fr; }
+      .grid > section.panel:first-child {
+        position: static;
+        max-height: none;
+        display: block;
+      }
+      .grid > section.panel:first-child .panelBody {
+        overflow: visible;
+      }
+      pre { height: auto; max-height: 75vh; }
+    }
 
     .drop {
       border: 1px dashed rgba(255,255,255,0.25);
@@ -187,8 +213,19 @@
 
     .controls {
       display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
       margin-top: 14px;
+    }
+
+    /* make the action row span full width */
+    .controls > .row {
+      grid-column: 1 / -1;
+    }
+
+    /* make big drop zone spans full width when needed */
+    .drop {
+      grid-column: 1 / -1;
     }
 
     .control {
@@ -233,7 +270,8 @@
 
     pre {
       margin: 0;
-      height: 100%;
+      height: auto;
+      max-height: 75vh;
       overflow: auto;
       padding: 14px;
       border-radius: 14px;
@@ -271,44 +309,65 @@
     }
 
     canvas { display: none; }
+
+    /* Layout: stack input panel on top, ASCII panel below */
+    @media (min-width: 960px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    /* Make ASCII output height fit content (so aspect stays true) */
+    .asciiPanel { min-height: auto; }
+    pre { height: auto; max-height: 75vh; }
+
+    /* Fix overlap: ensure proper stacking and sizing */
+    .grid { 
+      position: relative;
+    }
+
+    .grid > section.panel:first-child {
+      z-index: 1;
+      width: 100%;
+    }
+
+    .grid > section.panel.asciiPanel {
+      position: relative;
+      z-index: 0;
+      min-width: 0;
+    }
   </style>
 </head>
 <body>
   <header>
     <div class="title">
-      <h1>Image → ASCII Art</h1>
-      <span class="badge">Client-side • Không upload ảnh</span>
+      <h1 data-i18n="ascii.title">Image → ASCII Art</h1>
+      <button class="langToggle" type="button" data-lang-toggle>VI</button>
     </div>
-    <p class="subtitle">
-      Ảnh quá nhiều màu/chi tiết (như ảnh bạn gửi) thường sẽ khó nhìn khi chỉ dùng độ sáng.
-      Thử các gợi ý: giảm width, tăng contrast, bật Edge, hoặc dùng charset dạng blocks.
-    </p>
   </header>
 
   <main>
     <div class="grid">
       <section class="panel">
         <div class="panelHeader">
-          <h2>1) Nhập ảnh</h2>
+          <h2 data-i18n="ascii.input.title">Image Input</h2>
           <div class="tools">
-            <button class="btn" id="btnPick" type="button">Chọn ảnh</button>
-            <button class="btn btnDanger" id="btnClear" type="button">Xoá</button>
+            <button class="btn" id="btnPick" type="button" data-i18n="ascii.pick">Choose Image</button>
+            <button class="btn btnDanger" id="btnClear" type="button" data-i18n="ascii.clear">Clear</button>
             <input id="fileInput" type="file" accept="image/*" />
           </div>
         </div>
 
         <div class="panelBody">
-          <div class="drop" id="dropZone" tabindex="0" aria-label="Khu vực kéo thả ảnh">
+          <div class="drop" id="dropZone" tabindex="0" aria-label="Image drag and drop area" data-i18n-aria-label="ascii.drop.aria">
             <div class="row">
               <div>
-                <strong>Kéo-thả ảnh</strong>
-                <div class="hint">Hoặc bấm “Chọn ảnh”.</div>
+                <strong data-i18n="ascii.drop.title">Drag and drop an image</strong>
+                <div class="hint" data-i18n="ascii.drop.hint">Or click “Choose Image”.</div>
               </div>
             </div>
 
             <div class="previewWrap">
               <div class="preview" id="preview">
-                <div class="small">Chưa có ảnh</div>
+                <div class="small" data-i18n="ascii.noImage">No image selected</div>
               </div>
             </div>
           </div>
@@ -316,20 +375,20 @@
           <div class="controls">
             <div class="control">
               <label>
-                <span>Độ rộng (ký tự)</span>
+                <span data-i18n="ascii.width">Width (characters)</span>
                 <output id="outWidth">120</output>
               </label>
               <input id="rangeWidth" type="range" min="40" max="240" value="120" />
-              <div class="hint">Gợi ý: ảnh nhiều chi tiết → giảm còn ~80–120 để dễ nhìn.</div>
+              <div class="hint" data-i18n="ascii.width.hint">Tip: for detailed images, lower this to about 80-120 for readability.</div>
             </div>
 
             <div class="control">
               <label>
-                <span>Độ tương phản</span>
+                <span data-i18n="ascii.contrast">Contrast</span>
                 <output id="outContrast">1.00</output>
               </label>
               <input id="rangeContrast" type="range" min="50" max="260" value="120" />
-              <div class="hint">Gợi ý: tăng 1.2–2.0 để nổi khối.</div>
+              <div class="hint" data-i18n="ascii.contrast.hint">Tip: increase to 1.2-2.0 for stronger form.</div>
             </div>
 
             <div class="control">
@@ -338,37 +397,38 @@
                 <output id="outGamma">1.00</output>
               </label>
               <input id="rangeGamma" type="range" min="50" max="220" value="95" />
-              <div class="hint">Thường gamma ~0.8–1.1 tuỳ ảnh.</div>
+              <div class="hint" data-i18n="ascii.gamma.hint">Gamma around 0.8-1.1 usually works well, depending on the image.</div>
             </div>
 
             <div class="control">
               <label>
-                <span>Chế độ</span>
+                <span data-i18n="ascii.mode">Mode</span>
                 <output class="srOnly" id="outMode">&nbsp;</output>
               </label>
               <select id="modeSelect">
-                <option value="luma">Grayscale (luma)</option>
-                <option value="edge" selected>Edge (cạnh) — dễ nhìn hơn với ảnh nhiều màu</option>
+                <option value="luma" data-i18n="ascii.mode.luma">Grayscale (luma)</option>
+                <option value="edge" selected data-i18n="ascii.mode.edge">Edge - easier to read for colorful images</option>
               </select>
             </div>
 
             <div class="control">
               <label>
-                <span>Bộ ký tự</span>
+                <span data-i18n="ascii.charset">Character Set</span>
                 <output class="srOnly" id="outCharset">&nbsp;</output>
               </label>
               <select id="charsetSelect">
                 <option value="blocks" selected>█▓▒░ </option>
+                <option value="gray69">Gray ramp (69)</option>
                 <option value="complex">@%#*+=-:. </option>
                 <option value="simple">#*+=-:. </option>
                 <option value="binary">10 </option>
               </select>
-              <div class="hint">Ảnh nhiều chi tiết → thử “blocks”.</div>
+              <div class="hint" data-i18n="ascii.charset.hint">For detailed images, try “blocks” or “gray69”.</div>
             </div>
 
             <div class="control">
               <label>
-                <span>Font size</span>
+                <span data-i18n="ascii.fontSize">Font size</span>
                 <output id="outFont">12px</output>
               </label>
               <input id="rangeFont" type="range" min="8" max="20" value="12" />
@@ -376,35 +436,35 @@
 
             <div class="control">
               <label>
-                <span>Line height</span>
+                <span data-i18n="ascii.lineHeight">Line height</span>
                 <output id="outLine">1.05</output>
               </label>
               <input id="rangeLine" type="range" min="90" max="150" value="105" />
-              <div class="hint">Nếu ASCII bị “dẹt”, tăng line-height một chút.</div>
+              <div class="hint" data-i18n="ascii.lineHeight.hint">If the ASCII looks flattened, increase line height a little.</div>
             </div>
 
             <div class="control">
               <label>
-                <span>Tùy chọn</span>
+                <span data-i18n="ascii.options">Options</span>
                 <span class="small">&nbsp;</span>
               </label>
               <div class="row" style="gap: 12px; align-items: center;">
                 <label class="small" style="display:flex; gap:8px; align-items:center;">
-                  <input id="chkInvert" type="checkbox" /> Đảo màu
+                  <input id="chkInvert" type="checkbox" /> <span data-i18n="ascii.invert">Invert colors</span>
                 </label>
                 <label class="small" style="display:flex; gap:8px; align-items:center;">
-                  <input id="chkMono" type="checkbox" checked /> Font monospace
+                  <input id="chkMono" type="checkbox" checked /> <span data-i18n="ascii.mono">Monospace font</span>
                 </label>
                 <label class="small" style="display:flex; gap:8px; align-items:center;">
-                  <input id="chkAutoLevels" type="checkbox" checked /> Auto-levels
+                  <input id="chkAutoLevels" type="checkbox" checked /> <span data-i18n="ascii.autoLevels">Auto-levels</span>
                 </label>
               </div>
-              <div class="hint">Auto-levels giúp ảnh nhiều màu tăng tương phản tự nhiên.</div>
+              <div class="hint" data-i18n="ascii.autoLevels.hint">Auto-levels helps colorful images gain natural contrast.</div>
             </div>
 
             <div class="control">
               <label>
-                <span>Tuỳ chọn nâng cao</span>
+                <span data-i18n="ascii.advanced">Advanced Options</span>
                 <span class="small">dithering</span>
               </label>
               <div class="row" style="gap: 12px; align-items: center;">
@@ -414,49 +474,49 @@
               </div>
               <div style="margin-top: 10px;">
                 <label style="display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:13px; color: rgba(255,255,255,0.80); margin-bottom:10px;">
-                  <span>Độ mạnh dithering</span>
+                  <span data-i18n="ascii.ditherStrength">Dithering strength</span>
                   <output id="outDither">0.75</output>
                 </label>
                 <input id="rangeDither" type="range" min="0" max="100" value="75" />
-                <div class="hint">Giảm nếu bị nhiễu; tăng nếu muốn cảm giác “mức xám” rõ hơn.</div>
+                <div class="hint" data-i18n="ascii.dither.hint">Lower it if the result is noisy; raise it for clearer grayscale texture.</div>
               </div>
             </div>
 
             <div class="control">
               <label>
-                <span>Block size (px)</span>
+                <span data-i18n="ascii.blockSize">Block size (px)</span>
                 <output id="outBlock">2×3</output>
               </label>
               <div class="row" style="gap: 10px; flex-wrap: nowrap;">
                 <input id="rangeBlockW" type="range" min="1" max="10" value="2" />
                 <input id="rangeBlockH" type="range" min="1" max="14" value="3" />
               </div>
-              <div class="hint">Gom pixel theo khối (block) rồi lấy trung bình độ sáng → thường dễ nhìn và ít nhiễu hơn.</div>
+              <div class="hint" data-i18n="ascii.block.hint">Group pixels into blocks and average brightness for clearer, less noisy ASCII.</div>
             </div>
 
             <div class="control">
               <label>
-                <span>Blur (giảm nhiễu)</span>
+                <span data-i18n="ascii.blur">Blur (noise reduction)</span>
                 <output id="outBlur">0</output>
               </label>
               <input id="rangeBlur" type="range" min="0" max="6" value="0" />
-              <div class="hint">Ảnh neon nhiều chi tiết → thử blur 1–3 để “ra hình” rõ hơn và ít hạt.</div>
+              <div class="hint" data-i18n="ascii.blur.hint">For detailed neon images, try blur 1-3 for clearer shapes and less grain.</div>
             </div>
 
             <div class="control">
               <label>
-                <span>Blur type</span>
+                <span data-i18n="ascii.blurType">Blur type</span>
                 <span class="small">prefilter</span>
               </label>
               <select id="blurTypeSelect">
-                <option value="box" selected>Box blur (nhanh)</option>
-                <option value="gaussian">Gaussian blur (mượt)</option>
+                <option value="box" selected data-i18n="ascii.blurType.box">Box blur (fast)</option>
+                <option value="gaussian" data-i18n="ascii.blurType.gaussian">Gaussian blur (smooth)</option>
               </select>
             </div>
 
             <div class="row">
-              <button class="btn btnPrimary" id="btnGenerate" type="button">Generate ASCII</button>
-              <button class="btn" id="btnCopy" type="button">Copy</button>
+              <button class="btn btnPrimary" id="btnGenerate" type="button" data-i18n="ascii.generate">Generate ASCII</button>
+              <button class="btn" id="btnCopy" type="button" data-i18n="ascii.copy">Copy</button>
               <span class="small" id="status"></span>
             </div>
           </div>
@@ -465,13 +525,13 @@
 
       <section class="panel asciiPanel">
         <div class="panelHeader">
-          <h2>2) ASCII art</h2>
+          <h2 data-i18n="ascii.output.title">ASCII art</h2>
           <div class="tools">
             <span class="small" id="meta">—</span>
           </div>
         </div>
         <div class="asciiWrap">
-          <pre id="asciiOut">Chọn một ảnh để bắt đầu…</pre>
+          <pre id="asciiOut" data-placeholder-key="ascii.output.placeholder">Choose an image to start...</pre>
         </div>
       </section>
     </div>
@@ -479,6 +539,7 @@
     <canvas id="canvas"></canvas>
   </main>
 
+  <script src="./i18n.js"></script>
   <script>
     const fileInput = document.getElementById('fileInput');
     const btnPick = document.getElementById('btnPick');
@@ -524,6 +585,9 @@
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
     const CHARSETS = {
+      // 69 grayscale levels (dark -> light)
+      gray69: "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ",
+      // 10 grayscale levels (dark -> light)
       complex: '@%#*+=-:. ',
       simple: '#*+=-:. ',
       blocks: '█▓▒░ ',
@@ -531,6 +595,18 @@
     };
 
     let sourceImage = null;
+
+    function t(key, fallback) {
+      return window.SakuraI18n ? window.SakuraI18n.t(key, fallback) : fallback;
+    }
+
+    function noImageMarkup() {
+      return `<div class="small" data-i18n="ascii.noImage">${t('ascii.noImage', 'No image selected')}</div>`;
+    }
+
+    function outputPlaceholder() {
+      return t('ascii.output.placeholder', 'Choose an image to start...');
+    }
 
     function setStatus(msg, type = 'info') {
       statusEl.textContent = msg || '';
@@ -562,10 +638,18 @@
     btnClear.addEventListener('click', () => {
       fileInput.value = '';
       sourceImage = null;
-      preview.innerHTML = '<div class="small">Chưa có ảnh</div>';
-      asciiOut.textContent = 'Chọn một ảnh để bắt đầu…';
+      preview.innerHTML = noImageMarkup();
+      asciiOut.textContent = outputPlaceholder();
       metaEl.textContent = '—';
       setStatus('');
+    });
+
+    window.addEventListener('languagechange', () => {
+      if (!sourceImage) {
+        const emptyPreview = preview.querySelector('[data-i18n="ascii.noImage"]');
+        if (emptyPreview) emptyPreview.textContent = t('ascii.noImage', 'No image selected');
+        asciiOut.textContent = outputPlaceholder();
+      }
     });
 
     [rangeWidth, rangeContrast, rangeGamma, rangeFont, rangeLine, modeSelect, charsetSelect, chkInvert, chkAutoLevels, chkDither, rangeDither, rangeBlockW, rangeBlockH, rangeBlur, blurTypeSelect].forEach((el) => {
@@ -589,7 +673,7 @@
 
     function loadFile(file) {
       if (!file.type.startsWith('image/')) {
-        setStatus('File không phải ảnh.', 'error');
+        setStatus(t('ascii.error.notImage', 'The selected file is not an image.'), 'error');
         return;
       }
       const url = URL.createObjectURL(file);
@@ -599,10 +683,10 @@
         sourceImage = img;
         preview.innerHTML = '';
         preview.appendChild(img);
-        setStatus('Đã load ảnh.');
+        setStatus(t('ascii.status.loaded', 'Image loaded.'));
         scheduleGenerate(true);
       };
-      img.onerror = () => setStatus('Không thể load ảnh.', 'error');
+      img.onerror = () => setStatus(t('ascii.error.load', 'Could not load the image.'), 'error');
       img.src = url;
     }
 
@@ -627,18 +711,18 @@
     });
 
     btnGenerate.addEventListener('click', () => {
-      if (!sourceImage) return setStatus('Vui lòng chọn ảnh trước.', 'error');
+      if (!sourceImage) return setStatus(t('ascii.error.pickFirst', 'Please choose an image first.'), 'error');
       generateASCII(true);
     });
 
     btnCopy.addEventListener('click', async () => {
       const text = asciiOut.textContent || '';
-      if (!text.trim()) return setStatus('Chưa có ASCII để copy.', 'error');
+      if (!text.trim()) return setStatus(t('ascii.error.noAscii', 'There is no ASCII to copy yet.'), 'error');
       try {
         await navigator.clipboard.writeText(text);
-        setStatus('Đã copy vào clipboard!');
+        setStatus(t('ascii.status.copied', 'Copied to clipboard!'));
       } catch {
-        setStatus('Copy thất bại (trình duyệt chặn).', 'error');
+        setStatus(t('ascii.error.copy', 'Copy failed (blocked by the browser).'), 'error');
       }
     });
 
@@ -890,17 +974,32 @@
       if (!img) return;
 
       const outWChars = Number(rangeWidth.value);
-      const charAspect = 0.55;
+
+      // Character cell aspect correction
+      // - Each character cell is roughly (charWidth x charHeight).
+      // - In the browser, charHeight is controlled by font-size * line-height.
+      // - charWidth is ~ font-size * 0.6 (typical monospace width ratio).
+      // We use this to keep ASCII proportional to the original image.
+      const fontSizePx = Number(rangeFont.value);
+      const lineHeight = Number(rangeLine.value) / 100;
+      const approxCharWidth = Math.max(1e-6, fontSizePx * 0.6);
+      const approxCharHeight = Math.max(1e-6, fontSizePx * lineHeight);
+      const charAspect = approxCharWidth / approxCharHeight; // < 1 => compress height
 
       // Instead of 1 char = 1 pixel, we render an intermediate image,
       // then compute block averages per character cell.
       const blockW = Number(rangeBlockW.value);
       const blockH = Number(rangeBlockH.value);
 
-      // internal render size in pixels
+      // Internal render size in pixels
+      // We want output in chars to match the input image aspect ratio.
       const renderW = Math.max(1, outWChars * blockW);
       const scale = renderW / img.naturalWidth;
-      const renderH = Math.max(1, Math.round(img.naturalHeight * scale * charAspect * blockH));
+
+      // Height in chars should be proportional to image ratio, with char aspect correction
+      // outHChars ~= outWChars * (imgH/imgW) * (charWidth/charHeight)
+      const outHChars = Math.max(1, Math.round(outWChars * (img.naturalHeight / img.naturalWidth) * charAspect));
+      const renderH = Math.max(1, outHChars * blockH);
 
       canvas.width = renderW;
       canvas.height = renderH;
@@ -978,8 +1077,8 @@
         }
 
         asciiOut.textContent = ascii;
-        metaEl.textContent = `${outW}×${outH} chars • block: ${blockW}×${blockH} px • blur: ${blurType}(${blurRadius}) • charset: ${charsetSelect.value} • mode: edge`;
-        if (force) setStatus('Đã generate ASCII.');
+        metaEl.textContent = `${outW}×${outH} ${t('ascii.meta.chars', 'chars')} • ${t('ascii.meta.img', 'img')}: ${img.naturalWidth}×${img.naturalHeight} • ${t('ascii.meta.block', 'block')}: ${blockW}×${blockH} px • ${t('ascii.meta.blur', 'blur')}: ${blurType}(${blurRadius}) • ${t('ascii.meta.charset', 'charset')}: ${charsetSelect.value} • ${t('ascii.meta.mode', 'mode')}: edge`;
+        if (force) setStatus(t('ascii.status.generated', 'ASCII generated.'));
         return;
       }
 
@@ -1017,8 +1116,8 @@
       }
 
       asciiOut.textContent = ascii;
-      metaEl.textContent = `${outW}×${outH} chars • block: ${blockW}×${blockH} px • blur: ${blurType}(${blurRadius}) • charset: ${charsetSelect.value} • mode: luma • auto-levels: ${chkAutoLevels.checked ? 'on' : 'off'} • dither: ${ditherOn ? 'on' : 'off'}`;
-      if (force) setStatus('Đã generate ASCII.');
+      metaEl.textContent = `${outW}×${outH} ${t('ascii.meta.chars', 'chars')} • ${t('ascii.meta.img', 'img')}: ${img.naturalWidth}×${img.naturalHeight} • ${t('ascii.meta.block', 'block')}: ${blockW}×${blockH} px • ${t('ascii.meta.blur', 'blur')}: ${blurType}(${blurRadius}) • ${t('ascii.meta.charset', 'charset')}: ${charsetSelect.value} • ${t('ascii.meta.mode', 'mode')}: luma • ${t('ascii.meta.autoLevels', 'auto-levels')}: ${chkAutoLevels.checked ? t('ascii.meta.on', 'on') : t('ascii.meta.off', 'off')} • ${t('ascii.meta.dither', 'dither')}: ${ditherOn ? t('ascii.meta.on', 'on') : t('ascii.meta.off', 'off')}`;
+      if (force) setStatus(t('ascii.status.generated', 'ASCII generated.'));
     }
   </script>
 </body>

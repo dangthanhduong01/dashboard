@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -31,8 +31,25 @@
       padding: 28px 18px 10px;
     }
 
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
     h1 { margin: 0 0 8px; font-size: 28px; }
     p { margin: 0; color: var(--muted); line-height: 1.55; }
+
+    .langToggle {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: var(--text);
+      background: var(--panel);
+      cursor: pointer;
+      font-weight: 700;
+    }
 
     main {
       max-width: 980px;
@@ -71,38 +88,44 @@
 </head>
 <body>
   <header>
-    <h1>Dashboard</h1>
-    <p>Danh sách demo / tools trong repo.</p>
+    <div class="topbar">
+      <div>
+        <h1 data-i18n="index.title">Dashboard</h1>
+        <p data-i18n="index.subtitle">Demo pages and tools in this project.</p>
+      </div>
+      <button class="langToggle" type="button" data-lang-toggle>VI</button>
+    </div>
   </header>
 
   <main>
     <a class="card" href="./ascii-tool.html">
       <div class="titleRow">
         <strong>Image → ASCII Art</strong>
-        <span class="muted">Tool chuyển ảnh sang ASCII</span>
+        <span class="muted" data-i18n="index.ascii.description">Convert images to ASCII</span>
       </div>
     </a>
 
     <a class="card" href="./cherry-blossom.html">
       <div class="titleRow">
         <strong>Cherry Blossom</strong>
-        <span class="muted">Hoa anh đào rơi</span>
+        <span class="muted" data-i18n="index.cherry.description">Falling cherry blossoms</span>
       </div>
     </a>
 
     <a class="card" href="./cyberpunk.html">
       <div class="titleRow">
         <strong>Cyberpunk</strong>
-        <span class="muted">Neon / glitch / particles</span>
+        <span class="muted" data-i18n="index.cyberpunk.description">Neon / glitch / particles</span>
       </div>
     </a>
 
     <a class="card" href="./block-puzzle-zen/">
       <div class="titleRow">
         <strong>Block Puzzle Zen</strong>
-        <span class="muted">Vite + React app</span>
+        <span class="muted" data-i18n="index.block.description">Vite + React app</span>
       </div>
     </a>
   </main>
+  <script src="./i18n.js"></script>
 </body>
 </html>

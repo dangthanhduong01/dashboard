@@ -1,5 +1,3 @@
-The big-picture-level concept is simple:
-
 Each printable character can be assigned an approximate gray-scale value; the "at" sign @ obviously is visually darker than the "plus" sign +, for example. The effect will vary, depending on the font and spacing actually used.
 
 Based on the proportions of the chosen font, group the input image into rectangular pixel blocks with constant width and height (e.g. a rectangle 4 pixels wide and 5 pixels high). Each such block will become one character in the output. (Using the pixel blocks just mentioned, a 240w-x-320h image would become 64 lines of 60 characters.)

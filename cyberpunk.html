@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyberpunk City</title>
+    <title data-i18n="cyber.title">Cyberpunk City</title>
     <style>
         * {
             margin: 0;
@@ -136,7 +136,7 @@
         /* Title */
         .title {
             position: absolute;
-            top: 50%;
+            top: 10%;
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
@@ -144,8 +144,8 @@
         }
 
         .title h1 {
-            font-size: 4rem;
-            margin-bottom: 1rem;
+            font-size: clamp(2rem, 5vw, 4rem);
+            margin-bottom: 0.75rem;
             background: linear-gradient(45deg, #00ffff, #ff00ff, #00ffff);
             background-size: 200% 200%;
             -webkit-background-clip: text;
@@ -160,13 +160,363 @@
         }
 
         .title p {
-            font-size: 1.5rem;
+            font-size: clamp(0.9rem, 2vw, 1.5rem);
             color: #00ffff;
             animation: fadeIn 3s ease-in, flicker 4s infinite;
             text-shadow: 
                 0 0 10px rgba(0, 255, 255, 0.8),
                 0 0 20px rgba(0, 255, 255, 0.5);
             letter-spacing: 4px;
+        }
+
+        .lang-toggle {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            z-index: 120;
+            border: 1px solid rgba(0, 255, 255, 0.58);
+            border-radius: 999px;
+            padding: 8px 12px;
+            color: #00ffff;
+            background: rgba(0, 0, 0, 0.62);
+            cursor: pointer;
+            font: 700 12px/1 'Courier New', monospace;
+            box-shadow:
+                0 0 16px rgba(0, 255, 255, 0.28),
+                inset 0 0 12px rgba(255, 0, 255, 0.12);
+            text-shadow: 0 0 8px rgba(0, 255, 255, 0.85);
+        }
+
+        .speed-tool {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            z-index: 20;
+            width: min(520px, calc(100vw - 32px));
+            padding: 22px;
+            color: #eaffff;
+            background:
+                linear-gradient(135deg, rgba(0, 255, 255, 0.12), transparent 42%),
+                linear-gradient(315deg, rgba(255, 0, 255, 0.16), transparent 48%),
+                rgba(3, 0, 18, 0.82);
+            border: 1px solid rgba(0, 255, 255, 0.85);
+            border-radius: 6px;
+            box-shadow:
+                0 0 28px rgba(0, 255, 255, 0.36),
+                0 0 58px rgba(255, 0, 255, 0.2),
+                inset 0 0 24px rgba(0, 255, 255, 0.12);
+            transform: translate(-50%, -50%);
+            backdrop-filter: blur(8px);
+        }
+
+        .speed-tool::before,
+        .speed-tool::after {
+            content: "";
+            position: absolute;
+            width: 38px;
+            height: 38px;
+            pointer-events: none;
+        }
+
+        .speed-tool::before {
+            top: -1px;
+            left: -1px;
+            border-top: 3px solid #ff00ff;
+            border-left: 3px solid #ff00ff;
+            box-shadow: -4px -4px 18px rgba(255, 0, 255, 0.5);
+        }
+
+        .speed-tool::after {
+            right: -1px;
+            bottom: -1px;
+            border-right: 3px solid #00ffff;
+            border-bottom: 3px solid #00ffff;
+            box-shadow: 4px 4px 18px rgba(0, 255, 255, 0.5);
+        }
+
+        .speed-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .speed-head h2 {
+            margin: 0;
+            color: #00ffff;
+            font-size: clamp(1.1rem, 3vw, 1.45rem);
+            letter-spacing: 2px;
+            text-shadow:
+                0 0 10px rgba(0, 255, 255, 0.9),
+                0 0 24px rgba(255, 0, 255, 0.45);
+        }
+
+        .speed-status {
+            min-width: 92px;
+            color: #00ff66;
+            font-size: 0.78rem;
+            text-align: right;
+            text-shadow: 0 0 10px rgba(0, 255, 102, 0.8);
+        }
+
+        .speed-readout {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .wifi-gauge {
+            position: relative;
+            display: grid;
+            place-items: center;
+            min-height: 250px;
+            padding: 14px 12px 6px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 0, 255, 0.55);
+            background:
+                radial-gradient(circle at 50% 66%, rgba(0, 255, 255, 0.18), transparent 18%),
+                radial-gradient(circle at 50% 78%, rgba(255, 0, 255, 0.14), transparent 34%),
+                rgba(0, 0, 0, 0.38);
+            box-shadow:
+                inset 0 0 24px rgba(255, 0, 255, 0.1),
+                0 0 20px rgba(255, 0, 255, 0.13);
+        }
+
+        .gauge-face {
+            position: relative;
+            width: min(360px, 100%);
+            aspect-ratio: 2 / 1.12;
+        }
+
+        .gauge-arc {
+            position: absolute;
+            inset: 0 0 auto;
+            aspect-ratio: 2 / 1;
+            border-radius: 999px 999px 0 0;
+            background:
+                conic-gradient(from 270deg at 50% 100%,
+                    #00ffff 0deg var(--gauge-angle, 0deg),
+                    rgba(0, 255, 255, 0.12) var(--gauge-angle, 0deg) 180deg,
+                    transparent 180deg 360deg);
+            filter: drop-shadow(0 0 16px rgba(0, 255, 255, 0.5));
+        }
+
+        .gauge-arc::before {
+            content: "";
+            position: absolute;
+            inset: 14px 14px 0;
+            border-radius: inherit;
+            background:
+                repeating-conic-gradient(from 270deg at 50% 100%,
+                    rgba(234, 255, 255, 0.9) 0 1.2deg,
+                    transparent 1.2deg 9deg),
+                linear-gradient(180deg, rgba(3, 0, 18, 0.96), rgba(0, 0, 0, 0.92));
+        }
+
+        .gauge-arc::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: -1px;
+            width: 74%;
+            height: 74%;
+            border-radius: 50% 50% 0 0;
+            transform: translateX(-50%);
+            background: rgba(3, 0, 18, 0.98);
+            box-shadow: inset 0 0 28px rgba(0, 255, 255, 0.08);
+        }
+
+        .gauge-needle {
+            position: absolute;
+            left: 50%;
+            bottom: 16px;
+            z-index: 2;
+            width: 42%;
+            height: 4px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, transparent 0 8%, #eaffff 12%, #00ffff 64%, #ff00ff);
+            box-shadow:
+                0 0 12px rgba(0, 255, 255, 0.9),
+                0 0 22px rgba(255, 0, 255, 0.55);
+            transform: rotate(calc(-90deg + var(--gauge-angle, 0deg)));
+            transform-origin: 0 50%;
+            transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .gauge-hub {
+            position: absolute;
+            left: 50%;
+            bottom: 2px;
+            z-index: 3;
+            width: 34px;
+            height: 34px;
+            border: 2px solid #00ffff;
+            border-radius: 50%;
+            background: #060018;
+            box-shadow:
+                0 0 15px rgba(0, 255, 255, 0.85),
+                inset 0 0 12px rgba(255, 0, 255, 0.45);
+            transform: translateX(-50%);
+        }
+
+        .gauge-center {
+            position: absolute;
+            left: 50%;
+            bottom: 30px;
+            z-index: 4;
+            width: 100%;
+            text-align: center;
+            transform: translateX(-50%);
+        }
+
+        .wifi-icon {
+            position: relative;
+            width: 58px;
+            height: 34px;
+            margin: 0 auto 8px;
+        }
+
+        .wifi-icon span {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            border: 2px solid #00ffff;
+            border-bottom: 0;
+            border-radius: 90px 90px 0 0;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.85);
+            transform: translateX(-50%);
+        }
+
+        .wifi-icon span:nth-child(1) {
+            width: 54px;
+            height: 28px;
+            opacity: 0.42;
+        }
+
+        .wifi-icon span:nth-child(2) {
+            width: 38px;
+            height: 20px;
+            opacity: 0.68;
+        }
+
+        .wifi-icon span:nth-child(3) {
+            width: 20px;
+            height: 11px;
+            opacity: 0.95;
+        }
+
+        .wifi-icon::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: -5px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff00ff;
+            box-shadow: 0 0 12px rgba(255, 0, 255, 0.9);
+            transform: translateX(-50%);
+        }
+
+        .gauge-value {
+            display: flex;
+            justify-content: center;
+            align-items: baseline;
+            gap: 8px;
+            color: #ffffff;
+            text-shadow: 0 0 16px rgba(0, 255, 255, 0.75);
+        }
+
+        .gauge-scale {
+            position: absolute;
+            left: 5px;
+            right: 5px;
+            bottom: 2px;
+            display: flex;
+            justify-content: space-between;
+            color: rgba(234, 255, 255, 0.5);
+            font-size: 0.66rem;
+            letter-spacing: 1px;
+        }
+
+        .secondary-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .speed-metric {
+            min-height: 88px;
+            padding: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.35);
+            background: rgba(0, 0, 0, 0.38);
+            box-shadow: inset 0 0 18px rgba(0, 255, 255, 0.08);
+        }
+
+        .speed-metric.primary {
+            min-height: 250px;
+            border-color: rgba(255, 0, 255, 0.55);
+            box-shadow:
+                inset 0 0 24px rgba(255, 0, 255, 0.1),
+                0 0 20px rgba(255, 0, 255, 0.13);
+        }
+
+        .metric-label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(234, 255, 255, 0.68);
+            font-size: 0.75rem;
+            letter-spacing: 1.5px;
+        }
+
+        .metric-value {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            color: #ffffff;
+            text-shadow: 0 0 16px rgba(0, 255, 255, 0.75);
+        }
+
+        .metric-number {
+            font-size: clamp(2.25rem, 8vw, 4.4rem);
+            line-height: 0.95;
+            font-weight: 700;
+        }
+
+        .speed-metric:not(.primary) .metric-number {
+            font-size: clamp(1.55rem, 4vw, 2.25rem);
+        }
+
+        .metric-unit {
+            color: #00ffff;
+            font-size: 0.86rem;
+        }
+
+        .speed-bar {
+            position: relative;
+            height: 9px;
+            margin: 4px 0 16px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 255, 255, 0.55);
+            background: rgba(0, 0, 0, 0.55);
+        }
+
+        .speed-bar span {
+            display: block;
+            width: var(--progress, 0%);
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
+            box-shadow: 0 0 18px rgba(0, 255, 255, 0.75);
+            transition: width 0.2s ease;
+        }
+
+        .speed-note {
+            color: rgba(234, 255, 255, 0.66);
+            font-size: 0.78rem;
+            line-height: 1.45;
+            overflow-wrap: anywhere;
         }
 
         @keyframes neonGlow {
@@ -322,6 +672,56 @@
                 transform: rotateY(360deg) rotateX(360deg);
             }
         }
+
+        @media (max-width: 640px) {
+            .title {
+                top: 8%;
+            }
+
+            .title h1 {
+                letter-spacing: 3px;
+            }
+
+            .title p {
+                letter-spacing: 2px;
+            }
+
+            .speed-tool {
+                left: 50%;
+                right: auto;
+                top: 58%;
+                width: calc(100vw - 24px);
+                padding: 16px;
+                transform: translate(-50%, -50%);
+            }
+
+            .speed-head {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .wifi-gauge {
+                min-height: 220px;
+                padding-top: 12px;
+            }
+
+            .gauge-face {
+                width: min(260px, calc(100vw - 76px));
+            }
+
+            .secondary-metrics {
+                grid-template-columns: 1fr;
+            }
+
+            .speed-metric {
+                min-height: 72px;
+            }
+
+            .speed-status {
+                text-align: left;
+            }
+
+        }
     </style>
 </head>
 <body>
@@ -347,21 +747,107 @@
         <!-- Title -->
         <div class="title">
             <h1>⚡ CYBERPUNK ⚡</h1>
-            <p>WELCOME TO THE FUTURE</p>
+            <p data-i18n="cyber.subtitle">WELCOME TO THE FUTURE</p>
         </div>
+
+        <button class="lang-toggle" type="button" data-lang-toggle>VI</button>
+
+        <!-- Speed test -->
+        <section class="speed-tool" id="speedTool" aria-label="Internet speed meter">
+            <div class="speed-head">
+                <h2 data-i18n="cyber.meter.title">WIFI SPEED METER</h2>
+                <div class="speed-status" id="speedStatus" data-i18n="cyber.status.ready">READY</div>
+            </div>
+
+            <div class="speed-readout">
+                <div class="wifi-gauge" id="wifiGauge">
+                    <div class="gauge-face">
+                        <div class="gauge-arc"></div>
+                        <div class="gauge-needle" id="gaugeNeedle"></div>
+                        <div class="gauge-hub"></div>
+                        <div class="gauge-center">
+                            <div class="wifi-icon" aria-hidden="true">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                            <span class="metric-label" data-i18n="cyber.metric.download">WIFI DOWNLOAD</span>
+                            <div class="gauge-value">
+                                <span class="metric-number" id="downloadSpeed">--</span>
+                                <span class="metric-unit">Mbps</span>
+                            </div>
+                        </div>
+                        <div class="gauge-scale" aria-hidden="true">
+                            <span>0</span>
+                            <span>100</span>
+                            <span>250</span>
+                            <span>500+</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="secondary-metrics">
+                    <div class="speed-metric">
+                        <span class="metric-label" data-i18n="cyber.metric.upload">UPLOAD</span>
+                        <div class="metric-value">
+                            <span class="metric-number" id="uploadSpeed">--</span>
+                            <span class="metric-unit">Mbps</span>
+                        </div>
+                    </div>
+
+                    <div class="speed-metric">
+                        <span class="metric-label" data-i18n="cyber.metric.ping">PING</span>
+                        <div class="metric-value">
+                            <span class="metric-number" id="pingValue">--</span>
+                            <span class="metric-unit">ms</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="speed-bar" aria-hidden="true">
+                <span id="speedProgress"></span>
+            </div>
+
+            <div class="speed-note" id="speedNote" data-i18n="cyber.note.initial">Automatically scans network speed when the page opens.</div>
+        </section>
 
         <!-- Stats -->
         <div class="stats">
-            <div>PARTICLES: <span id="particleCount">0</span></div>
-            <div>SYSTEM STATUS: <span style="color: #00ff00;">ONLINE</span></div>
-            <div>CLICK TO GENERATE EFFECTS</div>
+            <div><span data-i18n="cyber.stats.particles">PARTICLES:</span> <span id="particleCount">0</span></div>
+            <div><span data-i18n="cyber.stats.system">SYSTEM STATUS:</span> <span style="color: #00ff00;" data-i18n="cyber.stats.online">ONLINE</span></div>
+            <div data-i18n="cyber.stats.click">CLICK TO GENERATE EFFECTS</div>
         </div>
     </div>
 
+    <script src="./i18n.js"></script>
     <script>
         const container = document.getElementById('container');
         const particleCountElement = document.getElementById('particleCount');
+        const speedTool = document.getElementById('speedTool');
+        const speedStatus = document.getElementById('speedStatus');
+        const speedNote = document.getElementById('speedNote');
+        const wifiGauge = document.getElementById('wifiGauge');
+        const speedProgress = document.getElementById('speedProgress');
+        const downloadSpeedElement = document.getElementById('downloadSpeed');
+        const uploadSpeedElement = document.getElementById('uploadSpeed');
+        const pingValueElement = document.getElementById('pingValue');
         let particleCount = 0;
+        let testingSpeed = false;
+
+        function t(key, fallback, params = {}) {
+            const template = window.SakuraI18n ? window.SakuraI18n.t(key, fallback) : fallback;
+            return Object.keys(params).reduce((text, name) => {
+                return text.replaceAll(`{${name}}`, params[name]);
+            }, template);
+        }
+
+        function setSpeedStatus(key, fallback, color) {
+            speedStatus.textContent = t(key, fallback);
+            if (color) {
+                speedStatus.style.color = color;
+            }
+        }
 
         // Function to create a particle
         function createParticle(x, y, color) {
@@ -419,6 +905,156 @@
             }, 4000);
         }
 
+        function setSpeedProgress(value) {
+            speedProgress.style.setProperty('--progress', `${Math.max(0, Math.min(value, 100))}%`);
+        }
+
+        function setGaugeSpeed(mbps) {
+            const maxSpeed = 500;
+            const safeSpeed = Number.isFinite(mbps) ? Math.max(0, Math.min(mbps, maxSpeed)) : 0;
+            const angle = (safeSpeed / maxSpeed) * 180;
+            wifiGauge.style.setProperty('--gauge-angle', `${angle}deg`);
+        }
+
+        function formatSpeed(mbps) {
+            if (!Number.isFinite(mbps)) {
+                return '--';
+            }
+            return mbps >= 100 ? mbps.toFixed(0) : mbps.toFixed(1);
+        }
+
+        function createTimeoutSignal(ms) {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), ms);
+            return { controller, timeout };
+        }
+
+        async function measurePing() {
+            const samples = [];
+
+            for (let i = 0; i < 3; i++) {
+                const { controller, timeout } = createTimeoutSignal(5000);
+                const started = performance.now();
+                await fetch(`https://www.google.com/generate_204?cyber=${Date.now()}-${i}`, {
+                    mode: 'no-cors',
+                    cache: 'no-store',
+                    signal: controller.signal
+                });
+                clearTimeout(timeout);
+                samples.push(performance.now() - started);
+            }
+
+            return Math.round(samples.reduce((sum, value) => sum + value, 0) / samples.length);
+        }
+
+        async function measureDownload() {
+            const bytesToDownload = 12000000;
+            const { controller, timeout } = createTimeoutSignal(14000);
+            const started = performance.now();
+            let received = 0;
+
+            const response = await fetch(`https://speed.cloudflare.com/__down?bytes=${bytesToDownload}&cyber=${Date.now()}`, {
+                cache: 'no-store',
+                signal: controller.signal
+            });
+
+            if (!response.ok || !response.body) {
+                throw new Error('Unable to download speed test data.');
+            }
+
+            const reader = response.body.getReader();
+
+            while (true) {
+                const { done, value } = await reader.read();
+
+                if (done) {
+                    break;
+                }
+
+                received += value.length;
+                const elapsed = (performance.now() - started) / 1000;
+                const liveMbps = elapsed > 0 ? (received * 8) / elapsed / 1000000 : 0;
+                setGaugeSpeed(liveMbps);
+                setSpeedProgress(25 + (received / bytesToDownload) * 45);
+
+                if (elapsed > 4 && received > 1000000) {
+                    controller.abort();
+                    break;
+                }
+            }
+
+            clearTimeout(timeout);
+            const seconds = (performance.now() - started) / 1000;
+            return (received * 8) / seconds / 1000000;
+        }
+
+        async function measureUpload() {
+            const uploadBytes = 2500000;
+            const payload = new Uint8Array(uploadBytes);
+            const { controller, timeout } = createTimeoutSignal(12000);
+            const started = performance.now();
+
+            const response = await fetch(`https://speed.cloudflare.com/__up?bytes=${uploadBytes}&cyber=${Date.now()}`, {
+                method: 'POST',
+                body: payload,
+                cache: 'no-store',
+                signal: controller.signal
+            });
+
+            clearTimeout(timeout);
+
+            if (!response.ok) {
+                throw new Error('Unable to upload speed test data.');
+            }
+
+            const seconds = (performance.now() - started) / 1000;
+            return (uploadBytes * 8) / seconds / 1000000;
+        }
+
+        async function runSpeedTest() {
+            if (testingSpeed) {
+                return;
+            }
+
+            testingSpeed = true;
+            setSpeedStatus('cyber.status.testing', 'TESTING', '#ffff00');
+            speedNote.textContent = t('cyber.note.ping', 'Measuring ping...');
+            setSpeedProgress(8);
+            setGaugeSpeed(0);
+            downloadSpeedElement.textContent = '--';
+            uploadSpeedElement.textContent = '--';
+            pingValueElement.textContent = '--';
+
+            try {
+                const ping = await measurePing();
+                pingValueElement.textContent = ping;
+                setSpeedProgress(24);
+
+                speedNote.textContent = t('cyber.note.download', 'Measuring download...');
+                const download = await measureDownload();
+                downloadSpeedElement.textContent = formatSpeed(download);
+                setGaugeSpeed(download);
+                setSpeedProgress(72);
+
+                speedNote.textContent = t('cyber.note.upload', 'Measuring upload...');
+                const upload = await measureUpload();
+                uploadSpeedElement.textContent = formatSpeed(upload);
+                setSpeedProgress(100);
+
+                setSpeedStatus('cyber.status.done', 'DONE', '#00ff66');
+                speedNote.textContent = t('cyber.note.done', 'Completed at {time}.', {
+                    time: new Date().toLocaleTimeString(window.SakuraI18n && window.SakuraI18n.getLanguage() === 'vi' ? 'vi-VN' : 'en-US')
+                });
+            } catch (error) {
+                setSpeedStatus('cyber.status.error', 'ERROR', '#ff3864');
+                speedNote.textContent = error.name === 'AbortError'
+                    ? t('cyber.note.timeout', 'The scan timed out. Try again when the network is more stable.')
+                    : t('cyber.note.error', 'Unable to scan. Network, CORS, or an ad blocker may be blocking the endpoint.');
+            } finally {
+                testingSpeed = false;
+            }
+        }
+
         // Create particles periodically
         function startParticleFlow() {
             setInterval(() => {
@@ -443,8 +1079,13 @@
             createNeonCircle(e.clientX, e.clientY);
         });
 
+        speedTool.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
         // Start particle flow
         startParticleFlow();
+        window.setTimeout(runSpeedTest, 450);
 
         // Create initial particles
         for (let i = 0; i < 30; i++) {
